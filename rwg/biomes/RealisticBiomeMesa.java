@@ -2,6 +2,7 @@ package rwg.biomes;
 
 import java.util.Random;
 
+import rwg.util.CanyonColor;
 import rwg.util.CliffCalculator;
 import rwg.util.PerlinNoise;
 import net.minecraft.block.Block;
@@ -16,23 +17,9 @@ import net.minecraft.world.gen.feature.WorldGenerator;
 
 public class RealisticBiomeMesa extends BiomeGenBase implements RealisticBiome
 {
-	private int[] claycolor = new int[100];
-	
 	public RealisticBiomeMesa(int id) 
 	{
 		super(id);
-		
-		int[] c = new int[]{1, 8, 0};
-		PerlinNoise perlin = new PerlinNoise(3L);
-		
-		float n;
-		for(int i = 0; i < 100; i++)
-		{
-			n = perlin.noise1(i / 3f) * 4f + perlin.noise1(i / 1f) * 0.6f + 1.5f;
-			n = n >= 3f ? 2.9f : n < 0f ? 0f : n;
-			claycolor[i] = c[(int)n];
-		}
-		
 		waterColorMultiplier = 0x00FF62;
 	}
 
@@ -129,13 +116,6 @@ public class RealisticBiomeMesa extends BiomeGenBase implements RealisticBiome
 		return 74f + b;
 	}
 	
-	public byte getClayColorForHeight(int k)
-	{
-		k -= 60;
-		k = k < 0 ? 0 : k > 99 ? 99 : k;
-		return (byte)claycolor[k];
-	}
-
 	@Override
 	public void rReplace(Block[] blocks, byte[] metadata, int i, int j, int x, int y, int depth, Random rand, PerlinNoise perlin, float[] noise) 
 	{
@@ -158,14 +138,14 @@ public class RealisticBiomeMesa extends BiomeGenBase implements RealisticBiome
 	            	if(cliff)
 	            	{
 	        			blocks[(y * 16 + x) * 256 + k] = Blocks.stained_hardened_clay;
-	    				metadata[(y * 16 + x) * 256 + k] = getClayColorForHeight(k);
+	    				metadata[(y * 16 + x) * 256 + k] = CanyonColor.getColorForHeight(k);
 	            	}
 	            	else
 	            	{
 	        			if(depth > 4)
 	        			{
 		        			blocks[(y * 16 + x) * 256 + k] = Blocks.stained_hardened_clay;
-		        			metadata[(y * 16 + x) * 256 + k] = getClayColorForHeight(k);
+		        			metadata[(y * 16 + x) * 256 + k] = CanyonColor.getColorForHeight(k);
 	        			}
 	        			else if(k > 77)
 	        			{
@@ -217,7 +197,7 @@ public class RealisticBiomeMesa extends BiomeGenBase implements RealisticBiome
         		else if(k > 70)
         		{
         			blocks[(y * 16 + x) * 256 + k] = Blocks.stained_hardened_clay;
-        			metadata[(y * 16 + x) * 256 + k] = getClayColorForHeight(k);
+        			metadata[(y * 16 + x) * 256 + k] = CanyonColor.getColorForHeight(k);
         		}
             }
 		}

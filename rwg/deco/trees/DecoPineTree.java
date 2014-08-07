@@ -13,12 +13,14 @@ import net.minecraftforge.common.util.ForgeDirection;
 public class DecoPineTree extends WorldGenAbstractTree
 {
 	private int height;
+	private int metadata;
 	
-    public DecoPineTree(int h)
+    public DecoPineTree(int h, int m)
     {
         super(false);
         
         height = h;
+        metadata = m;
     }
 
     public boolean generate(World p_76484_1_, Random p_76484_2_, int p_76484_3_, int p_76484_4_, int p_76484_5_)
@@ -100,7 +102,7 @@ public class DecoPineTree extends WorldGenAbstractTree
 
                                 if ((Math.abs(i3) != l3 || Math.abs(k3) != l3 || l3 <= 0) && p_76484_1_.getBlock(l2, k2, j3).canBeReplacedByLeaves(p_76484_1_, l2, k2, j3))
                                 {
-                                    p_76484_1_.setBlock(l2, k2, j3, Blocks.leaves, 0, 0);
+                                    p_76484_1_.setBlock(l2, k2, j3, Blocks.leaves, metadata, 0);
                                 }
                             }
                         }
@@ -133,6 +135,11 @@ public class DecoPineTree extends WorldGenAbstractTree
                         	p_76484_1_.setBlock(p_76484_3_, p_76484_4_ + k2, p_76484_5_, Blocks.log, 0, 0);
                         }
                     }
+                    
+                    if(height > 4)
+                    {
+                    	createTrunk(p_76484_1_, p_76484_2_, p_76484_3_, p_76484_4_, p_76484_5_);
+                    }
 
                     return true;
                 }
@@ -146,5 +153,25 @@ public class DecoPineTree extends WorldGenAbstractTree
         {
             return false;
         }
+    }
+    
+    private void createTrunk(World world, Random rand, int x, int y, int z)
+    {
+    	int[] pos = new int[]{0,0, 1,0, 0,1, -1,0, 0,-1};
+    	int sh;
+    	Block b;
+    	for(int t = 0; t < 5; t++)
+    	{    	
+    		sh = rand.nextInt(4) + y - 2;
+    		while(sh > y - 1)
+    		{
+    			if(world.getBlock(x + pos[t * 2], sh, z + pos[t * 2 + 1]) == Blocks.grass)
+    			{
+    				break;
+    			}
+    			world.setBlock(x + pos[t * 2], sh, z + pos[t * 2 + 1], Blocks.log, 12, 0);
+    			sh--;
+    		}
+    	}
     }
 }

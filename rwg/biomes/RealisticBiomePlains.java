@@ -7,9 +7,9 @@ import net.minecraft.block.Block;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 
-public class RealisticBiomeJungleFields extends BiomeGenBase implements RealisticBiome
+public class RealisticBiomePlains extends BiomeGenBase implements RealisticBiome
 {
-	public RealisticBiomeJungleFields(int id) 
+	public RealisticBiomePlains(int id) 
 	{
 		super(id);
 	}
@@ -26,9 +26,8 @@ public class RealisticBiomeJungleFields extends BiomeGenBase implements Realisti
 	}
 
 	@Override
-	public void rReplace(Block[] blocks, byte[] metadata, int i, int j, int x, int y, int depth, Random rand, PerlinNoise perlin, float[] noise) 
+	public void rReplace(Block[] blocks, byte[] metadata, int i, int j, int x, int y, int depth, Random rand, PerlinNoise perlin, float[] noise)
 	{
-		
 	}
 
 	@Override

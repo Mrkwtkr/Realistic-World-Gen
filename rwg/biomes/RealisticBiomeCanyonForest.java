@@ -3,7 +3,10 @@ package rwg.biomes;
 import java.util.Random;
 
 import rwg.deco.DecoCacti;
+import rwg.deco.DecoFlowers;
+import rwg.deco.DecoGrass;
 import rwg.deco.trees.DecoSavannah;
+import rwg.util.CanyonColor;
 import rwg.util.CliffCalculator;
 import rwg.util.PerlinNoise;
 import net.minecraft.block.Block;
@@ -17,27 +20,14 @@ import net.minecraft.world.gen.feature.WorldGenFlowers;
 import net.minecraft.world.gen.feature.WorldGenPumpkin;
 import net.minecraft.world.gen.feature.WorldGenReed;
 import net.minecraft.world.gen.feature.WorldGenShrub;
+import net.minecraft.world.gen.feature.WorldGenWaterlily;
 import net.minecraft.world.gen.feature.WorldGenerator;
 
 public class RealisticBiomeCanyonForest extends BiomeGenBase implements RealisticBiome
 {
-	private int[] claycolor = new int[100];
-	
 	public RealisticBiomeCanyonForest(int id)
 	{
 		super(id);
-		
-		int[] c = new int[]{1, 8, 0};
-		PerlinNoise perlin = new PerlinNoise(2L);
-		
-		float n;
-		for(int i = 0; i < 100; i++)
-		{
-			n = perlin.noise1(i / 3f) * 3f + perlin.noise1(i / 1f) * 0.3f + 1.5f;
-			n = n >= 3f ? 2.9f : n < 0f ? 0f : n;
-			claycolor[i] = c[(int)n];
-		}
-		
 		waterColorMultiplier = 0x00FF62;
 	}
 
@@ -61,7 +51,7 @@ public class RealisticBiomeCanyonForest extends BiomeGenBase implements Realisti
 			int k10 = chunkY + rand.nextInt(16) + 8;
 			int z52 = world.getHeightValue(j6, k10);
 
-			if(z52 > 100)
+			if(z52 > 80)
 			{
 				WorldGenerator worldgenerator = new WorldGenShrub(0, 0);
 				worldgenerator.setScale(1.0D, 1.0D, 1.0D);
@@ -69,7 +59,7 @@ public class RealisticBiomeCanyonForest extends BiomeGenBase implements Realisti
 			}
 			else
 			{
-				WorldGenerator worldgenerator = rand.nextBoolean() ? new WorldGenShrub(0, 0) : rand.nextInt(3) == 0 ? new DecoSavannah(0) : new DecoSavannah(2);
+				WorldGenerator worldgenerator = rand.nextBoolean() ? new WorldGenShrub(0, 0) : rand.nextInt(6) == 0 ? new DecoSavannah(0) : new DecoSavannah(2);
 				worldgenerator.setScale(1.0D, 1.0D, 1.0D);
 				worldgenerator.generate(world, rand, j6, z52, k10);
 			}
@@ -105,6 +95,38 @@ public class RealisticBiomeCanyonForest extends BiomeGenBase implements Realisti
 			int k24 = chunkY + rand.nextInt(16) + 8;
 			(new DecoCacti(true)).generate(world, rand, k21, j23, k24);
 		}
+		
+		for(int f23 = 0; f23 < 5; f23++)
+		{
+			int j15 = chunkX + rand.nextInt(16) + 8;
+			int j17 = rand.nextInt(128);
+			int j20 = chunkY + rand.nextInt(16) + 8;
+			if(j17 < 80)
+			{
+				(new DecoFlowers(new int[]{11,11,9,3,3,3,2,1,1})).generate(world, rand, j15, j17, j20);
+			}
+		}
+		
+		for(int l14 = 0; l14 < 15; l14++)
+		{
+			int l19 = chunkX + rand.nextInt(16) + 8;
+			int k22 = rand.nextInt(128);
+			int j24 = chunkY + rand.nextInt(16) + 8;
+
+			if(k22 < 80)
+			{
+				(new DecoGrass(Blocks.tallgrass, 1)).generate(world, rand, l19, k22, j24);
+			}
+		}
+		
+        for (int l15 = 0; l15 < 5; l15++)
+        {
+            int x34 = chunkX + rand.nextInt(16) + 8;
+            int y34 = 62;
+            int z34 = chunkY + rand.nextInt(16) + 8;
+
+            (new WorldGenWaterlily()).generate(world, rand, x34, y34, z34);
+        }
 	}
 
 	@Override
@@ -145,17 +167,15 @@ public class RealisticBiomeCanyonForest extends BiomeGenBase implements Realisti
 				bn *= bn / 4.5f;
 			}
 		}
+
+		if(b < 5f)
+		{
+			b += perlin.noise2(x / 13f, y / 13f) * (bn + 3f - b) * 0.4f;
+		}
 		
 		b += c1 + c2 - bn;
 		
 		return 69f + b;
-	}
-	
-	public byte getClayColorForHeight(int k)
-	{
-		k -= 60;
-		k = k < 0 ? 0 : k > 99 ? 99 : k;
-		return (byte)claycolor[k];
 	}
 
 	@Override
@@ -180,14 +200,14 @@ public class RealisticBiomeCanyonForest extends BiomeGenBase implements Realisti
 	            	if(cliff)
 	            	{
 	        			blocks[(y * 16 + x) * 256 + k] = Blocks.stained_hardened_clay;
-	        			metadata[(y * 16 + x) * 256 + k] = getClayColorForHeight(k);
+	        			metadata[(y * 16 + x) * 256 + k] = CanyonColor.getColorForHeight(k);
 	            	}
 	            	else
 	            	{
 	        			if(depth > 4)
 	        			{
 		        			blocks[(y * 16 + x) * 256 + k] = Blocks.stained_hardened_clay;
-		        			metadata[(y * 16 + x) * 256 + k] = getClayColorForHeight(k);
+		        			metadata[(y * 16 + x) * 256 + k] = CanyonColor.getColorForHeight(k);
 	        			}
 	        			else if(k > 77)
 	        			{
@@ -205,29 +225,15 @@ public class RealisticBiomeCanyonForest extends BiomeGenBase implements Realisti
 	        			{
 	        				blocks[(y * 16 + x) * 256 + k] = Blocks.dirt;
 	        			}
-	        			else if(k < 70)
+	        			else if(k < 80)
 	        			{
 	        				if(depth == 0)
 	        				{
-		        				int r = k - 62;
-		        				if(rand.nextInt(r + 1) == 0)
-		        				{
-			        				blocks[(y * 16 + x) * 256 + k] = Blocks.grass;
-		        				}
-		        				else if(rand.nextInt((int)(r / 2f) + 1) == 0)
-		        				{
-			        				blocks[(y * 16 + x) * 256 + k] = Blocks.dirt;
-		        				}
-		        				else
-		        				{
-			        				blocks[(y * 16 + x) * 256 + k] = Blocks.sand;
-			        				metadata[(y * 16 + x) * 256 + k] = 1;
-		        				}
+			        			blocks[(y * 16 + x) * 256 + k] = Blocks.grass;
 	        				}
 	        				else
 	        				{
-		        				blocks[(y * 16 + x) * 256 + k] = Blocks.sand;
-		        				metadata[(y * 16 + x) * 256 + k] = 1;
+		        				blocks[(y * 16 + x) * 256 + k] = Blocks.dirt;
 	        				}
 	        			}
 	        			else
@@ -240,7 +246,7 @@ public class RealisticBiomeCanyonForest extends BiomeGenBase implements Realisti
         		else if(k > 63)
         		{
         			blocks[(y * 16 + x) * 256 + k] = Blocks.stained_hardened_clay;
-        			metadata[(y * 16 + x) * 256 + k] = getClayColorForHeight(k);
+        			metadata[(y * 16 + x) * 256 + k] = CanyonColor.getColorForHeight(k);
         		}
             }
 		}

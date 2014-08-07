@@ -3,6 +3,7 @@ package rwg.biomes;
 import java.util.Random;
 
 import rwg.deco.DecoCacti;
+import rwg.util.CanyonColor;
 import rwg.util.CliffCalculator;
 import rwg.util.PerlinNoise;
 import net.minecraft.block.Block;
@@ -20,23 +21,9 @@ import net.minecraft.world.gen.feature.WorldGenerator;
 
 public class RealisticBiomeCanyon extends BiomeGenBase implements RealisticBiome
 {
-	private int[] claycolor = new int[100];
-	
 	public RealisticBiomeCanyon(int id)
 	{
 		super(id);
-		
-		int[] c = new int[]{1, 8, 0};
-		PerlinNoise perlin = new PerlinNoise(2L);
-		
-		float n;
-		for(int i = 0; i < 100; i++)
-		{
-			n = perlin.noise1(i / 3f) * 3f + perlin.noise1(i / 1f) * 0.3f + 1.5f;
-			n = n >= 3f ? 2.9f : n < 0f ? 0f : n;
-			claycolor[i] = c[(int)n];
-		}
-		
 		waterColorMultiplier = 0x00FF62;
 	}
 
@@ -150,17 +137,15 @@ public class RealisticBiomeCanyon extends BiomeGenBase implements RealisticBiome
 				bn *= bn / 4.5f;
 			}
 		}
+
+		if(b < 5f)
+		{
+			b += perlin.noise2(x / 13f, y / 13f) * (bn + 3f - b) * 0.4f;
+		}
 		
 		b += c1 + c2 + c3 + c4 - bn;
 		
 		return 69f + b;
-	}
-	
-	public byte getClayColorForHeight(int k)
-	{
-		k -= 60;
-		k = k < 0 ? 0 : k > 99 ? 99 : k;
-		return (byte)claycolor[k];
 	}
 
 	@Override
@@ -185,14 +170,14 @@ public class RealisticBiomeCanyon extends BiomeGenBase implements RealisticBiome
 	            	if(cliff)
 	            	{
 	        			blocks[(y * 16 + x) * 256 + k] = Blocks.stained_hardened_clay;
-	        			metadata[(y * 16 + x) * 256 + k] = getClayColorForHeight(k);
+	        			metadata[(y * 16 + x) * 256 + k] = CanyonColor.getColorForHeight(k);
 	            	}
 	            	else
 	            	{
 	        			if(depth > 4)
 	        			{
 		        			blocks[(y * 16 + x) * 256 + k] = Blocks.stained_hardened_clay;
-		        			metadata[(y * 16 + x) * 256 + k] = getClayColorForHeight(k);
+		        			metadata[(y * 16 + x) * 256 + k] = CanyonColor.getColorForHeight(k);
 	        			}
 	        			else if(k > 77)
 	        			{
@@ -245,7 +230,7 @@ public class RealisticBiomeCanyon extends BiomeGenBase implements RealisticBiome
         		else if(k > 63)
         		{
         			blocks[(y * 16 + x) * 256 + k] = Blocks.stained_hardened_clay;
-        			metadata[(y * 16 + x) * 256 + k] = getClayColorForHeight(k);
+        			metadata[(y * 16 + x) * 256 + k] = CanyonColor.getColorForHeight(k);
         		}
             }
 		}

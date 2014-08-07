@@ -29,7 +29,7 @@ public class RealisticBiomeGlacier extends BiomeGenBase implements RealisticBiom
 			int k10 = chunkY + rand.nextInt(16) + 8;
 			int z52 = world.getHeightValue(j6, k10);
 
-			WorldGenerator worldgenerator = new DecoPineTree(3);
+			WorldGenerator worldgenerator = new DecoPineTree(3, 1);
 			worldgenerator.setScale(1.0D, 1.0D, 1.0D);
 			worldgenerator.generate(world, rand, j6, z52, k10);
 		}

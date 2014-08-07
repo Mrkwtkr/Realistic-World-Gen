@@ -68,14 +68,14 @@ public class RealisticBiomeTaiga extends BiomeGenBase implements RealisticBiome
 				}
 				else
 				{
-					WorldGenerator worldgenerator = rand.nextInt(3) != 0 ? new DecoPineTree(5) : new WorldGenShrub(0, 0);
+					WorldGenerator worldgenerator = rand.nextInt(3) != 0 ? new DecoPineTree(5, rand.nextInt(2)) : new WorldGenShrub(0, 0);
 					worldgenerator.setScale(1.0D, 1.0D, 1.0D);
 					worldgenerator.generate(world, rand, j6, z52, k10);
 				}
 			}
 			else if(z52 < 130)
 			{
-				WorldGenerator worldgenerator = rand.nextInt(3) != 0 ? new DecoPineTree(3) : new WorldGenShrub(0, 0);
+				WorldGenerator worldgenerator = rand.nextInt(3) != 0 ? new DecoPineTree(3, rand.nextInt(2)) : new WorldGenShrub(0, 0);
 				worldgenerator.setScale(1.0D, 1.0D, 1.0D);
 				worldgenerator.generate(world, rand, j6, z52, k10);
 			}

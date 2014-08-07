@@ -54,7 +54,7 @@ public class ChunkManagerRealistic extends WorldChunkManager
     
     public int getBiomeByTempHum(float t, float h) 
     {
-    	return BiomeList.REALISTICcanyon.biomeID;
+    	return BiomeList.REALISTICsavannah.biomeID;
     }
 	
     public int[] getBiomesGens(int par1, int par2, int par3, int par4)
@@ -160,8 +160,34 @@ public class ChunkManagerRealistic extends WorldChunkManager
         return par1ArrayOfBiomeGenBase;
     }
 
-    public boolean areBiomesViable(int par1, int par2, int par3, List par4List)
+    public boolean areBiomesViable(int x, int y, int par3, List par4List)
     {
+    	float centerNoise = getNoiseAt(x,y);
+    	if(centerNoise < 62)
+    	{
+    		return false;
+    	}
+    	
+    	float lowestNoise = centerNoise;
+    	float highestNoise = centerNoise;
+    	for(int i = -2; i <= 2; i++)
+    	{
+    		for(int j = -2; j <= 2; j++)
+    		{
+    			if(i != 0 && j != 0)
+    			{
+    				float n = getNoiseAt(x + i * 16, y + j * 16);
+    				if(n < lowestNoise) { lowestNoise = n; }
+    				if(n > highestNoise) { highestNoise = n; }
+    			}
+    		}
+    	}
+    	
+    	if(highestNoise - lowestNoise < 22)
+    	{
+    		return true;
+    	}
+    	
     	return false;
     }
 

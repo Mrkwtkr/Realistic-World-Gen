@@ -5,7 +5,9 @@ import java.util.Random;
 import rwg.deco.DecoBlob;
 import rwg.deco.DecoFlowers;
 import rwg.deco.DecoGrass;
+import rwg.deco.trees.DecoEuroPine;
 import rwg.deco.trees.DecoPineTree;
+import rwg.deco.trees.DecoRedWood;
 import rwg.util.CliffCalculator;
 import rwg.util.PerlinNoise;
 import net.minecraft.block.Block;
@@ -15,6 +17,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.biome.BiomeGenPlains;
 import net.minecraft.world.biome.BiomeGenTaiga;
+import net.minecraft.world.gen.feature.WorldGenBigTree;
 import net.minecraft.world.gen.feature.WorldGenBlockBlob;
 import net.minecraft.world.gen.feature.WorldGenDoublePlant;
 import net.minecraft.world.gen.feature.WorldGenFlowers;
@@ -26,9 +29,9 @@ import net.minecraft.world.gen.feature.WorldGenTallGrass;
 import net.minecraft.world.gen.feature.WorldGenTrees;
 import net.minecraft.world.gen.feature.WorldGenerator;
 
-public class RealisticBiomeSnowTaiga extends BiomeGenBase implements RealisticBiome
+public class RealisticBiomeYosemite extends BiomeGenBase implements RealisticBiome
 {
-	public RealisticBiomeSnowTaiga(int id)
+	public RealisticBiomeYosemite(int id)
 	{
 		super(id);
 	}
@@ -47,12 +50,9 @@ public class RealisticBiomeSnowTaiga extends BiomeGenBase implements RealisticBi
 		    	(new DecoBlob(Blocks.mossy_cobblestone, 0)).generate(world, rand, i1, k1, j1);
 			}
 		}
-		
-		//trees
-		boolean bush = false;
-		float l = perlin.noise2(chunkX / 60f, chunkY / 60f) * 11f + 3f;
-		if(l < 0f) { l = 1; bush = true; }
-		for (int b1 = 0; b1 < l * 2; b1++)
+
+		float l = perlin.noise2(chunkX / 120f, chunkY / 120f);
+		if(rand.nextInt(l > 0.2f ? 5 : 1) == 0)
 		{
 			int j6 = chunkX + rand.nextInt(16) + 8;
 			int k10 = chunkY + rand.nextInt(16) + 8;
@@ -60,7 +60,27 @@ public class RealisticBiomeSnowTaiga extends BiomeGenBase implements RealisticBi
 
 			if(z52 < 75)
 			{
-				if(bush)
+				WorldGenerator worldgenerator = rand.nextInt(3) == 0 ? new DecoRedWood(34 + rand.nextInt(10), 20 + rand.nextInt(10), 6, rand.nextInt(2)) : new DecoRedWood(25 + rand.nextInt(5), 13 + rand.nextInt(5), 4, rand.nextInt(2));
+				worldgenerator.setScale(1.0D, 1.0D, 1.0D);
+				worldgenerator.generate(world, rand, j6, z52, k10);
+			}
+			else if(z52 < 85)
+			{
+				WorldGenerator worldgenerator = rand.nextInt(3) == 0 ? new DecoRedWood(22 + rand.nextInt(10), 14 + rand.nextInt(10), 5, rand.nextInt(2)) : new DecoRedWood(25 + rand.nextInt(5), 13 + rand.nextInt(5), 4, rand.nextInt(2));
+				worldgenerator.setScale(1.0D, 1.0D, 1.0D);
+				worldgenerator.generate(world, rand, j6, z52, k10);
+			}
+		}
+
+		for (int b1 = l > 0.2f ? 1 : 4; b1 > -1; b1--)
+		{
+			int j6 = chunkX + rand.nextInt(16) + 8;
+			int k10 = chunkY + rand.nextInt(16) + 8;
+			int z52 = world.getHeightValue(j6, k10);
+
+			if(z52 < 100)
+			{
+				if(l > 0.2f)
 				{
 					WorldGenerator worldgenerator = new WorldGenShrub(0, 0);
 					worldgenerator.setScale(1.0D, 1.0D, 1.0D);
@@ -68,64 +88,66 @@ public class RealisticBiomeSnowTaiga extends BiomeGenBase implements RealisticBi
 				}
 				else
 				{
-					WorldGenerator worldgenerator = rand.nextInt(3) != 0 ? new DecoPineTree(3, 1) : new WorldGenShrub(0, 0);
+					WorldGenerator worldgenerator = rand.nextInt(10) == 0 ? new WorldGenForest(false, false) : rand.nextInt(8) == 0 ? new DecoPineTree(5, rand.nextInt(2)) : rand.nextInt(4) == 0 ? new WorldGenTrees(false) : new WorldGenShrub(0, 0);
 					worldgenerator.setScale(1.0D, 1.0D, 1.0D);
 					worldgenerator.generate(world, rand, j6, z52, k10);
 				}
 			}
-			else if(z52 < 100 && rand.nextBoolean())
+		}
+
+		for (int b1 = 0; b1 < 7; b1++)
+		{
+			int j6 = chunkX + rand.nextInt(16) + 8;
+			int k10 = chunkY + rand.nextInt(16) + 8;
+			int z52 = world.getHeightValue(j6, k10);
+			if(z52 < 75) { break; }
+			if(z52 > 90)
 			{
-				WorldGenerator worldgenerator = new DecoPineTree(3, 1);
+				WorldGenerator worldgenerator = rand.nextInt(3) == 0 ? new DecoPineTree(3, rand.nextInt(2)) : new WorldGenShrub(0, 0);
 				worldgenerator.setScale(1.0D, 1.0D, 1.0D);
 				worldgenerator.generate(world, rand, j6, z52, k10);
 			}
 		}
 
-		if(!bush)
+		if(rand.nextInt(3) == 0)
 		{
-			if(rand.nextInt(3) == 0)
+			int k15 = chunkX + rand.nextInt(16) + 8;
+			int k17 = rand.nextInt(64) + 64;
+			int k20 = chunkY + rand.nextInt(16) + 8;
+			
+			if(rand.nextBoolean())
 			{
-				int k15 = chunkX + rand.nextInt(16) + 8;
-				int k17 = rand.nextInt(64) + 64;
-				int k20 = chunkY + rand.nextInt(16) + 8;
-				
-				if(rand.nextBoolean())
-				{
-					(new WorldGenFlowers(Blocks.brown_mushroom)).generate(world, rand, k15, k17, k20);
-				}
-				else
-				{
-					(new WorldGenFlowers(Blocks.red_mushroom)).generate(world, rand, k15, k17, k20);
-				}
+				(new WorldGenFlowers(Blocks.brown_mushroom)).generate(world, rand, k15, k17, k20);
+			}
+			else
+			{
+				(new WorldGenFlowers(Blocks.red_mushroom)).generate(world, rand, k15, k17, k20);
 			}
 		}
 		
-		if(bush)
+		if(rand.nextInt(24) == 0)
 		{
-			if(rand.nextInt(10) == 0)
-			{
-				int j16 = chunkX + rand.nextInt(16) + 8;
-				int j18 = rand.nextInt(128);
-				int j21 = chunkY + rand.nextInt(16) + 8;
-				(new WorldGenPumpkin()).generate(world, rand, j16, j18, j21);
-			}
+			int j16 = chunkX + rand.nextInt(16) + 8;
+			int j18 = 50 + rand.nextInt(128);
+			int j21 = chunkY + rand.nextInt(16) + 8;
+			(new WorldGenPumpkin()).generate(world, rand, j16, j18, j21);
 		}
 		
 		for(int f23 = 0; f23 < 2; f23++)
 		{
 			int j15 = chunkX + rand.nextInt(16) + 8;
-			int j17 = rand.nextInt(128);
+			int j17 = 50 + rand.nextInt(128);
 			int j20 = chunkY + rand.nextInt(16) + 8;
 			(new DecoFlowers(new int[]{9,0,3})).generate(world, rand, j15, j17, j20);
 		}
 
-		for(int l14 = 0; l14 < 5; l14++)
+		for(int l14 = 0; l14 < 8; l14++)
 		{
 			int l19 = chunkX + rand.nextInt(16) + 8;
-			int k22 = rand.nextInt(128);
+			int k22 = 50 + rand.nextInt(128);
 			int j24 = chunkY + rand.nextInt(16) + 8;
 
-			if(k22 < 78 && rand.nextInt(2) == 0)
+			if(k22 < 90 && rand.nextBoolean())
 			{
 				(new DecoGrass(Blocks.double_plant, 2)).generate(world, rand, l19, k22, j24);
 			}
@@ -140,24 +162,8 @@ public class RealisticBiomeSnowTaiga extends BiomeGenBase implements RealisticBi
 	public float rNoise(PerlinNoise perlin, int x, int y) 
 	{
 		float h = perlin.noise2(x / 300f, y / 300f) * 135f;
+		h = h < 0f ? 0f : h;
 		h *= h / 32f;
-		
-		float bn = 0f;
-		if(h < 1f)
-		{
-			bn = 1f - h;
-			for(int i = 0; i < 3; i++)
-			{
-				bn *= bn * 1.25f;
-			}
-			
-			bn = bn > 3f ? 3f : bn;
-		}
-		
-		if(h < 3f)
-		{
-			h += perlin.noise2(x / 13f, y / 13f) * (bn + 3f - h) * 0.8f;
-		}
 
 		if(h > 2f)
 		{
@@ -173,7 +179,17 @@ public class RealisticBiomeSnowTaiga extends BiomeGenBase implements RealisticBi
 			}
 		}
 		
-		return h + 63f - bn;
+		if(h < 30f)
+		{
+			if(h < 0f)
+			{
+				h = 0f;
+			}
+
+			h += perlin.noise2(x / 120f, y / 120f) * (30f - h) * 1f + perlin.noise2(x / 15f, y / 15f) * (30f - h) * 0.1f;
+		}
+		
+		return h + 63f;
 	}
 	
 	@Override
@@ -182,10 +198,7 @@ public class RealisticBiomeSnowTaiga extends BiomeGenBase implements RealisticBi
 		float c = CliffCalculator.calc(x, y, noise);
 		boolean cliff = c > 1.1f ? true : false;
 		boolean clay = c > 1.6f ? true : false;
-		boolean ice = perlin.noise2(i / 15f, j / 15f) > 0.4f ? true : false;
 		boolean gravel = false;
-		boolean snow = false;
-		float m = perlin.noise2(i / 12f, j / 12f);
 		
 		for(int k = 255; k > -1; k--)
 		{
@@ -201,12 +214,7 @@ public class RealisticBiomeSnowTaiga extends BiomeGenBase implements RealisticBi
             	{
             		if(cliff)
             		{
-            			if(k > 85 && m > 0.5f - ((k - 85f) / 30f))
-	        			{            				
-	        				snow = true;
-    	        			blocks[(y * 16 + x) * 256 + k] = Blocks.snow;
-	        			}
-	        			else if(clay)
+	        			if(clay)
         				{
             				blocks[(y * 16 + x) * 256 + k] = Blocks.stained_hardened_clay; 
             				metadata[(y * 16 + x) * 256 + k] = 9; 
@@ -222,11 +230,6 @@ public class RealisticBiomeSnowTaiga extends BiomeGenBase implements RealisticBi
                     			blocks[(y * 16 + x) * 256 + k] = Blocks.stone;
                     		}
         				}
-            			
-            			if(ice && !snow && depth == 0)
-            			{
-            				blocks[(y * 16 + x) * 256 + k] = Blocks.packed_ice;
-            			}
             		}
             		else
             		{
@@ -239,34 +242,12 @@ public class RealisticBiomeSnowTaiga extends BiomeGenBase implements RealisticBi
 		            		}
 		            		else
 		            		{
-	            				if(k > 85 && m > 0.5f - ((k - 85f) / 30f))
-	    	        			{            				
-	    	        				snow = true;
-		    	        			blocks[(y * 16 + x) * 256 + k] = Blocks.snow;
-	    	        			}
-	    	        			else if(k > 90 && m > 0.5f - ((k - 90f) / 60f))
-	    	        			{
-	                    			blocks[(y * 16 + x) * 256 + k] = rand.nextInt(3) == 0 ? Blocks.cobblestone : Blocks.stone; 
-	                    			cliff = true;
-	    	        			}
-	    	        			else
-	    	        			{
-	    	        				blocks[(y * 16 + x) * 256 + k] = Blocks.grass;
-	    	        			}
-
-	                			if(ice && !snow)
-	                			{
-	                				blocks[(y * 16 + x) * 256 + k] = Blocks.packed_ice;
-	                			}
+		    	        		blocks[(y * 16 + x) * 256 + k] = Blocks.grass;
 		            		}
 		            	}
 		            	else
 		            	{
-		            		if(snow)
-		            		{
-		            			blocks[(y * 16 + x) * 256 + k] = Blocks.snow;
-		            		}
-		            		else if(gravel)
+		            		if(gravel)
 		            		{
 		            			blocks[(y * 16 + x) * 256 + k] = Blocks.gravel;
 		            		}

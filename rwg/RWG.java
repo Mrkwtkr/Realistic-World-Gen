@@ -9,10 +9,10 @@ import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import rwg.biomes.BiomeList;
 import rwg.config.ConfigRWG;
-import rwg.world.ProviderRealistic;
 import rwg.world.WorldTypeRealistic;
+import net.minecraft.world.gen.structure.MapGenStructureIO;
 
-@Mod(modid="RWG", name="RealisticWorldGen", version="1.0.0", dependencies="after:BiomesOPlenty")
+@Mod(modid="RWG", name="RealisticWorldGen", version="1.0.0")
 public class RWG
 {	
 	@Instance("RWG")
@@ -37,7 +37,5 @@ public class RWG
 	@EventHandler
 	public void postInit(FMLPostInitializationEvent event) 
 	{
-		DimensionManager.unregisterProviderType(0);
-		DimensionManager.registerProviderType(0, ProviderRealistic.class, true);
 	}
 }

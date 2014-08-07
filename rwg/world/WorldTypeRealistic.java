@@ -1,6 +1,10 @@
 package rwg.world;
 
+import net.minecraft.world.World;
 import net.minecraft.world.WorldType;
+import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraft.world.biome.WorldChunkManager;
+import net.minecraft.world.chunk.IChunkProvider;
 
 public class WorldTypeRealistic extends WorldType
 {
@@ -9,14 +13,18 @@ public class WorldTypeRealistic extends WorldType
 		super(name);
 	}
 	
-    //@SideOnly(Side.CLIENT)
-    //public void onCustomizeButton(Minecraft instance, GuiCreateWorld guiCreateWorld)
-    //{
-    //	instance.displayGuiScreen(new GuiGeneratorSettings(guiCreateWorld, guiCreateWorld.field_146334_a));
-    //}
-    
-    //public boolean isCustomizable()
-    //{
-    //    return true;
-    //}
+    public WorldChunkManager getChunkManager(World world)
+    {
+        return new ChunkManagerRealistic(world);
+    }
+
+    public IChunkProvider getChunkGenerator(World world, String generatorOptions)
+    {
+        return new ChunkGeneratorRealistic(world, world.getSeed());
+    }
+	
+    public float getCloudHeight()
+    {
+        return 256F;
+    }
 }

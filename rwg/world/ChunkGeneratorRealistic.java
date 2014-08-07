@@ -1,9 +1,12 @@
 package rwg.world;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import rwg.biomes.RealisticBiome;
+import rwg.util.CanyonColor;
 import rwg.util.PerlinNoise;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFalling;
@@ -33,6 +36,7 @@ import net.minecraft.world.gen.feature.WorldGenTallGrass;
 import net.minecraft.world.gen.feature.WorldGenerator;
 import net.minecraft.world.gen.structure.MapGenMineshaft;
 import net.minecraft.world.gen.structure.MapGenStronghold;
+import net.minecraft.world.gen.structure.MapGenVillage;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.terraingen.PopulateChunkEvent;
 
@@ -44,6 +48,7 @@ public class ChunkGeneratorRealistic implements IChunkProvider
     private MapGenCaves caves;
     private MapGenStronghold strongholdGenerator = new MapGenStronghold();
     private MapGenMineshaft mineshaftGenerator = new MapGenMineshaft();
+    private MapGenVillage villageGenerator;
     
     private BiomeGenBase biomesForGeneration[];
     private final int biomesForGenLength;
@@ -51,7 +56,6 @@ public class ChunkGeneratorRealistic implements IChunkProvider
     private PerlinNoise perlin;
     
     private final int parabolicSize = 16;
-    private final int parabolicJump = 1; //not working right now
     private final int parabolicArraySize;
     private final float[] parabolicField;
     private float parabolicFieldTotal;
@@ -62,6 +66,13 @@ public class ChunkGeneratorRealistic implements IChunkProvider
         worldObj = world;
         rand = new Random(l);
         perlin = new PerlinNoise(l);
+        
+        Map m = new HashMap();
+        m.put("size", "0");
+        m.put("distance", "4");
+        villageGenerator = new MapGenVillage(m);
+        
+        CanyonColor.init(l);
 
         parabolicArraySize = parabolicSize * 2 + 1;
         biomesForGenLength = parabolicArraySize + 15;
@@ -70,7 +81,7 @@ public class ChunkGeneratorRealistic implements IChunkProvider
         {
             for (int k = -parabolicSize; k <= parabolicSize; ++k)
             {
-                float f = 0.445f / MathHelper.sqrt_float((float)((j * parabolicJump) * (j * parabolicJump) + (k * parabolicJump) * (k * parabolicJump)) + 0.2F);
+                float f = 0.445f / MathHelper.sqrt_float((float)(j * j * + k * k) + 0.2F);
                 parabolicField[j + parabolicSize + (k + parabolicSize) * parabolicArraySize] = f;
                 parabolicFieldTotal += f;
             }
@@ -92,6 +103,7 @@ public class ChunkGeneratorRealistic implements IChunkProvider
 
         mineshaftGenerator.func_151539_a(this, this.worldObj, cx, cy, blocks);
         strongholdGenerator.func_151539_a(this, this.worldObj, cx, cy, blocks);
+        villageGenerator.func_151539_a(this, this.worldObj, cx, cy, blocks);
         
         Chunk chunk = new Chunk(this.worldObj, blocks, metadata, cx, cy);
         byte[] abyte1 = chunk.getBiomeArray();
@@ -234,6 +246,7 @@ public class ChunkGeneratorRealistic implements IChunkProvider
 
         mineshaftGenerator.generateStructuresInChunk(worldObj, rand, i, j);
         strongholdGenerator.generateStructuresInChunk(worldObj, rand, i, j);
+        villageGenerator.generateStructuresInChunk(worldObj, rand, i, j);
         
 		if(rand.nextInt(10) == 0)
 		{
@@ -452,5 +465,6 @@ public class ChunkGeneratorRealistic implements IChunkProvider
     {
 		strongholdGenerator.func_151539_a(this, worldObj, par1, par2, (Block[])null);
 		mineshaftGenerator.func_151539_a(this, worldObj, par1, par2, (Block[])null);
+        villageGenerator.func_151539_a(this, this.worldObj, par1, par2, (Block[])null);
 	}
 }

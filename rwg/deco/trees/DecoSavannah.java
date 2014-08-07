@@ -141,9 +141,9 @@ public class DecoSavannah extends WorldGenerator
 	    		}
 	    	}
 	    	
-	    	for(i = -3; i <= 3 + 1; i++)
+	    	for(i = -3; i <= 3; i++)
 	    	{
-	    		for(j = -3; j <= 3 + 1; j++)
+	    		for(j = -3; j <= 3; j++)
 	    		{
 	    			if(world.isAirBlock(x + i, y, z + j) && Math.abs(i) + Math.abs(j) < 5)
 	    			{
