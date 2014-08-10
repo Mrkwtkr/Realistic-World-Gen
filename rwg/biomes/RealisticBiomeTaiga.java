@@ -34,10 +34,10 @@ public class RealisticBiomeTaiga extends BiomeGenBase implements RealisticBiome
 	}
 
 	@Override
-	public void rDecorate(World world, Random rand, int chunkX, int chunkY, PerlinNoise perlin) 
+	public void rDecorate(World world, Random rand, int chunkX, int chunkY, PerlinNoise perlin, float strength) 
 	{
 		//boulders
-		for (int l = 0; l < 8; ++l)
+		for (int l = 0; l < 8f * strength; ++l)
 		{
 			int i1 = chunkX + rand.nextInt(16) + 8;
 			int j1 = chunkY + rand.nextInt(16) + 8;
@@ -52,7 +52,7 @@ public class RealisticBiomeTaiga extends BiomeGenBase implements RealisticBiome
 		boolean bush = false;
 		float l = perlin.noise2(chunkX / 60f, chunkY / 60f) * 15f + 4f;
 		if(l < 0f) { l = 1; bush = true; }
-		for (int b1 = 0; b1 < l * 2; b1++)
+		for (int b1 = 0; b1 < l * 2f * strength; b1++)
 		{
 			int j6 = chunkX + rand.nextInt(16) + 8;
 			int k10 = chunkY + rand.nextInt(16) + 8;
@@ -83,7 +83,7 @@ public class RealisticBiomeTaiga extends BiomeGenBase implements RealisticBiome
 
 		if(!bush)
 		{
-			if(rand.nextInt(3) == 0)
+			if(rand.nextInt((int)(3f / strength)) == 0)
 			{
 				int k15 = chunkX + rand.nextInt(16) + 8;
 				int k17 = rand.nextInt(64) + 64;
@@ -102,7 +102,7 @@ public class RealisticBiomeTaiga extends BiomeGenBase implements RealisticBiome
 		
 		if(bush)
 		{
-			if(rand.nextInt(10) == 0)
+			if(rand.nextInt((int)(10f / strength)) == 0)
 			{
 				int j16 = chunkX + rand.nextInt(16) + 8;
 				int j18 = rand.nextInt(128);
@@ -111,7 +111,7 @@ public class RealisticBiomeTaiga extends BiomeGenBase implements RealisticBiome
 			}
 		}
 		
-		for(int f23 = bush ? -2 : 0; f23 < 2; f23++)
+		for(int f23 = bush ? -2 : 0; f23 < 2f * strength; f23++)
 		{
 			int j15 = chunkX + rand.nextInt(16) + 8;
 			int j17 = rand.nextInt(128);
@@ -119,7 +119,7 @@ public class RealisticBiomeTaiga extends BiomeGenBase implements RealisticBiome
 			(new DecoFlowers(new int[]{9,0,3})).generate(world, rand, j15, j17, j20);
 		}
 
-		for(int l14 = 0; l14 < 15; l14++)
+		for(int l14 = 0; l14 < 15f * strength; l14++)
 		{
 			int l19 = chunkX + rand.nextInt(16) + 8;
 			int k22 = rand.nextInt(128);
@@ -137,7 +137,7 @@ public class RealisticBiomeTaiga extends BiomeGenBase implements RealisticBiome
 	}
 
 	@Override
-	public float rNoise(PerlinNoise perlin, int x, int y) 
+	public float rNoise(PerlinNoise perlin, int x, int y, float ocean) 
 	{
 		float h = perlin.noise2(x / 300f, y / 300f) * 135f;
 		h *= h / 32f;

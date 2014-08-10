@@ -30,9 +30,9 @@ public class RealisticBiomeDesert extends BiomeGenBase implements RealisticBiome
 	}
 
 	@Override
-	public void rDecorate(World world, Random rand, int chunkX, int chunkY, PerlinNoise perlin) 
+	public void rDecorate(World world, Random rand, int chunkX, int chunkY, PerlinNoise perlin, float strength) 
 	{
-		for(int k18 = 0; k18 < 12; k18++)
+		for(int k18 = 0; k18 < 12f * strength; k18++)
 		{
 			int k21 = chunkX + rand.nextInt(16) + 8;
 			int j23 = rand.nextInt(160);
@@ -40,7 +40,7 @@ public class RealisticBiomeDesert extends BiomeGenBase implements RealisticBiome
 			(new DecoCacti(false)).generate(world, rand, k21, j23, k24);
 		}
 		
-		for(int i15 = 0; i15 < 3; i15++)
+		for(int i15 = 0; i15 < 3f * strength; i15++)
 		{
 			int i17 = chunkX + rand.nextInt(16) + 8;
 			int i20 = rand.nextInt(160);
@@ -50,7 +50,7 @@ public class RealisticBiomeDesert extends BiomeGenBase implements RealisticBiome
 	}
 
 	@Override
-	public float rNoise(PerlinNoise perlin, int x, int y) 
+	public float rNoise(PerlinNoise perlin, int x, int y, float ocean) 
 	{
 		float m = perlin.noise2(x / 150f, y / 150f) * 100f;
 		float mh = perlin.noise2(x / 150f, y / 150f) * 50f + 10f;

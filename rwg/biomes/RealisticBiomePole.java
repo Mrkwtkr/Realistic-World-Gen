@@ -19,13 +19,13 @@ public class RealisticBiomePole extends BiomeGenBase implements RealisticBiome
 	}
 
 	@Override
-	public void rDecorate(World world, Random rand, int chunkX, int chunkY, PerlinNoise perlin) 
+	public void rDecorate(World world, Random rand, int chunkX, int chunkY, PerlinNoise perlin, float strength) 
 	{
 		
 	}
 
 	@Override
-	public float rNoise(PerlinNoise perlin, int x, int y)
+	public float rNoise(PerlinNoise perlin, int x, int y, float ocean)
 	{
 		float lh = perlin.noise2(x / 180f, y / 180f) * 60f;
 		lh *= lh / 10f;

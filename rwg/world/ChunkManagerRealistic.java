@@ -22,7 +22,9 @@ public class ChunkManagerRealistic extends WorldChunkManager
     private PerlinNoise perlin;
     private int biomeLength;
     
-    private static int biomeLookupTable[] = new int[4096];	
+    private BiomeLayer biomeLayerLand;
+    private BiomeLayer biomeLayerCoast;
+    private BiomeLayer biomeLayerOcean;
 	
 	protected ChunkManagerRealistic()
 	{
@@ -35,27 +37,19 @@ public class ChunkManagerRealistic extends WorldChunkManager
         this();
         long seed = par1World.getSeed();
     	perlin = new PerlinNoise(seed);
-        
-		for(int i = 0; i < 64; i++)
-		{
-			for(int j = 0; j < 64; j++)
-			{
-				biomeLookupTable[i + j * 64] = getBiomeByTempHum((float)i / 63F, (float)j / 63F);
-			}
-		}
+    	
+    	biomeLayerLand = new BiomeLayer();
+    	biomeLayerLand.addBiome(0.5f, 0.5f, BiomeList.REALISTICtaiga);
+    	biomeLayerLand.calculate();
+    	
+    	biomeLayerCoast = new BiomeLayer();
+    	biomeLayerCoast.addBiome(0.5f, 0.5f, BiomeList.REALISTICcoastFjords);
+    	biomeLayerCoast.calculate();
+    	
+    	biomeLayerOcean = new BiomeLayer();
+    	biomeLayerOcean.addBiome(0.5f, 0.5f, BiomeList.fakeOcean);
+    	biomeLayerOcean.calculate();
     }    
-    
-    public static int getBiomeFromLookup(float d, float d1)
-    {
-        int i = (int)(d * 63D);
-        int j = (int)(d1 * 63D);
-        return biomeLookupTable[i + j * 64];
-    }
-    
-    public int getBiomeByTempHum(float t, float h) 
-    {
-    	return BiomeList.REALISTICsavannah.biomeID;
-    }
 	
     public int[] getBiomesGens(int par1, int par2, int par3, int par4)
     {	
@@ -70,21 +64,45 @@ public class ChunkManagerRealistic extends WorldChunkManager
 		}
     	return d;
     }
+    
+    public float getOceanValue(int x, int y)
+    {
+    	return 1f;// 0.5f + perlin.noise2(x / 2000f, y / 2000f);
+    }
 
     public BiomeGenBase getBiomeGenAt(int par1, int par2)
     {
-    	float temp = 0.5f + perlin.noise2(par1 / 500f, par2 / 500f);
+    	return getBiomeGenAt(par1, par2, getOceanValue(par1, par2));
+    }
+    
+    public BiomeGenBase getBiomeGenAt(int par1, int par2, float ocean)
+    {
+    	return biomeLayerLand.getBiome(1f, 1f);
+    	/*float temp = 0.5f + perlin.noise2(par1 / 500f, par2 / 500f);
     	float hum = 0.5f + perlin.noise2(par1 / 500f, par2 / 500f);
     	
     	temp = temp > 1f ? 1f : temp < 0f ? 0f : temp;
     	hum = hum > 1f ? 1f : hum < 0f ? 0f : hum;
+    	ocean = ocean > 1f ? 1f : ocean < 0f ? 0f : ocean;
     	
-        return BiomeGenBase.getBiome(getBiomeFromLookup(temp, hum));
+    	if(ocean < 0.45f)
+    	{
+    		return biomeLayerOcean.getBiome(temp, hum);
+    	}
+    	else if (ocean > 0.55f)
+    	{
+    		return biomeLayerLand.getBiome(temp, hum);
+    	}
+    	else
+    	{
+    		return biomeLayerCoast.getBiome(temp, hum);
+    	}*/
     }
     
     public float getNoiseAt(int x, int y)
     {
-    	return ((RealisticBiome)getBiomeGenAt(x, y)).rNoise(perlin, x, y);
+    	float ocean = getOceanValue(x, y);
+    	return ((RealisticBiome)getBiomeGenAt(x, y)).rNoise(perlin, x, y, ocean);
     }
     
     public List getBiomesToSpawnIn()

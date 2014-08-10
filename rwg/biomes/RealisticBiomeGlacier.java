@@ -21,9 +21,9 @@ public class RealisticBiomeGlacier extends BiomeGenBase implements RealisticBiom
 	}
 
 	@Override
-	public void rDecorate(World world, Random rand, int chunkX, int chunkY, PerlinNoise perlin) 
+	public void rDecorate(World world, Random rand, int chunkX, int chunkY, PerlinNoise perlin, float strength) 
 	{
-		if(rand.nextInt(5) == 0)
+		if(rand.nextInt((int)(5f / strength)) == 0)
 		{
 			int j6 = chunkX + rand.nextInt(16) + 8;
 			int k10 = chunkY + rand.nextInt(16) + 8;
@@ -36,7 +36,7 @@ public class RealisticBiomeGlacier extends BiomeGenBase implements RealisticBiom
 	}
 
 	@Override
-	public float rNoise(PerlinNoise perlin, int x, int y) 
+	public float rNoise(PerlinNoise perlin, int x, int y, float ocean) 
 	{
 		float h = perlin.noise2(x / 300f, y / 300f) * 135f;
 		h *= h / 32f;

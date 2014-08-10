@@ -32,7 +32,7 @@ public class DecoBlob extends WorldGenerator
                     {
                         Block block = p_76484_1_.getBlock(p_76484_3_, p_76484_4_ - 1, p_76484_5_);
 
-                        if (block == Blocks.grass || block == Blocks.dirt || block == Blocks.stone || block == Blocks.gravel)
+                        if (block == Blocks.grass || block == Blocks.dirt || block == Blocks.stone || block == Blocks.gravel || block == Blocks.sand)
                         {
                             break label63;
                         }

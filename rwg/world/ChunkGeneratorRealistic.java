@@ -67,10 +67,10 @@ public class ChunkGeneratorRealistic implements IChunkProvider
         rand = new Random(l);
         perlin = new PerlinNoise(l);
         
-        Map m = new HashMap();
-        m.put("size", "0");
-        m.put("distance", "4");
-        villageGenerator = new MapGenVillage(m);
+        //Map m = new HashMap();
+        //m.put("size", "0");
+        //m.put("distance", "4");
+        villageGenerator = new MapGenVillage();//m);
         
         CanyonColor.init(l);
 
@@ -94,10 +94,10 @@ public class ChunkGeneratorRealistic implements IChunkProvider
         Block[] blocks = new Block[65536];
         byte[] metadata = new byte[65536];
         float[] noise = new float[256];
-        WorldChunkManager wcm = worldObj.getWorldChunkManager();
-        biomesForGeneration = wcm.loadBlockGeneratorData(biomesForGeneration, cx * 16 - parabolicSize, cy * 16 - parabolicSize, biomesForGenLength, biomesForGenLength);
+        ChunkManagerRealistic cmr = (ChunkManagerRealistic)worldObj.getWorldChunkManager();
+        biomesForGeneration = cmr.loadBlockGeneratorData(biomesForGeneration, cx * 16 - parabolicSize, cy * 16 - parabolicSize, biomesForGenLength, biomesForGenLength);
     	
-        generateTerrain(wcm, cx, cy, blocks, metadata, biomesForGeneration, noise);
+        generateTerrain(cmr, cx, cy, blocks, metadata, biomesForGeneration, noise);
         replaceBlocksForBiome(cx, cy, blocks, metadata, biomesForGeneration, noise);
         caves.func_151539_a(this, worldObj, cx, cy, blocks);
 
@@ -115,7 +115,7 @@ public class ChunkGeneratorRealistic implements IChunkProvider
         return chunk;
     }
     
-    public void generateTerrain(WorldChunkManager wcm, int cx, int cy, Block[] blocks, byte[] metadata, BiomeGenBase biomes[], float[] n)
+    public void generateTerrain(ChunkManagerRealistic cmr, int cx, int cy, Block[] blocks, byte[] metadata, BiomeGenBase biomes[], float[] n)
     {	
     	int p;
     	float[] noise;
@@ -124,7 +124,7 @@ public class ChunkGeneratorRealistic implements IChunkProvider
     	{
     		for(int j = 0; j < 16; j++)
     		{
-    			noise = getNoise(wcm, i, j, cx * 16 + j, cy * 16 + i, biomes);
+    			noise = getNoise(cmr, i, j, cx * 16 + j, cy * 16 + i, biomes);
     			for(int k = 0; k < 256; k++)
     			{
     				p = (j * 16 + i) * 256 + k;
@@ -165,7 +165,7 @@ public class ChunkGeneratorRealistic implements IChunkProvider
     	}
     }
     
-    public float[] getNoise(WorldChunkManager wcm, int a, int b, int x, int y, BiomeGenBase biomes[])
+    public float[] getNoise(ChunkManagerRealistic cmr, int a, int b, int x, int y, BiomeGenBase biomes[])
     {
     	float[] noiseArray = new float[256];
     	for(int i = -parabolicSize; i <= parabolicSize; i++)
@@ -178,13 +178,14 @@ public class ChunkGeneratorRealistic implements IChunkProvider
     	
     	float noise = 0f;
     	float noise3D = 0f;
+    	float ocean = cmr.getOceanValue(x, y);
     	
     	int k;
     	for(k = 0; k < 256; k++)
     	{
     		if(noiseArray[k] > 0.0f)
     		{
-    			noise += ((RealisticBiome)BiomeGenBase.getBiome(k)).rNoise(perlin, x, y) * noiseArray[k];
+    			noise += ((RealisticBiome)BiomeGenBase.getBiome(k)).rNoise(perlin, x, y, ocean) * noiseArray[k];
     		}
     	}
     	
@@ -247,8 +248,8 @@ public class ChunkGeneratorRealistic implements IChunkProvider
         mineshaftGenerator.generateStructuresInChunk(worldObj, rand, i, j);
         strongholdGenerator.generateStructuresInChunk(worldObj, rand, i, j);
         villageGenerator.generateStructuresInChunk(worldObj, rand, i, j);
-        
-		if(rand.nextInt(10) == 0)
+
+        if(rand.nextInt(10) == 0)
 		{
 			int i2 = x + rand.nextInt(16) + 8;
 			int l4 = rand.nextInt(50);
@@ -367,7 +368,38 @@ public class ChunkGeneratorRealistic implements IChunkProvider
 			}
 		}
         
-        ((RealisticBiome)biomegenbase).rDecorate(this.worldObj, this.rand, x, y, perlin);
+        float[] biomeNoise = new float[256];
+        for(int bx = -4; bx <= 4; bx++)
+        {
+        	for(int by = -4; by <= 4; by++)
+        	{
+        		biomeNoise[worldObj.getBiomeGenForCoords(x + 24 + bx * 16, y + 24 + by * 16).biomeID] += 0.01234569f;
+        	}
+        }
+        
+        BiomeGenBase biome;
+        float snow = 0f;
+        for(int bn = 0; bn < 256; bn++)
+        {
+        	if(biomeNoise[bn] > 0f)
+        	{
+        		if(biomeNoise[bn] >= 1f)
+        		{
+        			biomeNoise[bn] = 1f;
+        		}
+        		biome = BiomeGenBase.getBiome(bn);
+                ((RealisticBiome)biome).rDecorate(this.worldObj, this.rand, x, y, perlin, biomeNoise[bn]);
+                
+                if(biome.temperature < 0.15f)
+                {
+                	snow -= 0.6f * biomeNoise[bn];
+                }
+                else
+                {
+                	snow += 0.6f * biomeNoise[bn];
+                }
+        	}
+        }
         
 		for(int l18 = 0; l18 < 50; l18++)
 		{
@@ -389,29 +421,47 @@ public class ChunkGeneratorRealistic implements IChunkProvider
 
         MinecraftForge.EVENT_BUS.post(new PopulateChunkEvent.Post(ichunkprovider, worldObj, rand, i, j, flag));
 
-        x += 8;
-        y += 8;
-		
-        for (int sn1 = 0; sn1 < 16; ++sn1)
+        if(snow < 0.59f)
         {
-            for (int sn2 = 0; sn2 < 16; ++sn2)
-            {
-                int sn3 = worldObj.getPrecipitationHeight(x + sn1, y + sn2);
-
-                if (worldObj.isBlockFreezable(sn1 + x, sn3 - 1, sn2 + y))
-                {
-                	worldObj.setBlock(sn1 + x, sn3 - 1, sn2 + y, Blocks.ice, 0, 0);
-                }
-
-                Block b = worldObj.getBlock(sn1 + x, sn3 - 1, sn2 + y);
-                if (worldObj.func_147478_e(sn1 + x, sn3, sn2 + y, false) && b != Blocks.ice && b != Blocks.water && sn3 > 62)
-                {
-                	if(worldObj.getBlock(sn1 + x, sn3, sn2 + y) != Blocks.snow_layer && b != Blocks.packed_ice)
-                	{
-                		worldObj.setBlock(sn1 + x, sn3, sn2 + y, Blocks.snow_layer, 0, 0);
-                	}
-                }
-            }
+	        x += 8;
+	        y += 8;
+			float s;
+			Block b1, b2;
+			
+	        for (int sn1 = 0; sn1 < 16; ++sn1)
+	        {
+	            for (int sn2 = 0; sn2 < 16; ++sn2)
+	            {
+	            	if(snow < -0.59f)
+	            	{
+	            		s = -1f;
+	            	}
+	            	else
+	            	{
+	            		s = perlin.noise2((sn1 + x) / 3f, (sn2 + y) / 3f) + snow;
+	            	}
+	            	
+	            	if(s < 0f)
+	            	{
+		                int sn3 = worldObj.getPrecipitationHeight(x + sn1, y + sn2);
+		                b1 = worldObj.getBlock(sn1 + x, sn3, sn2 + y);
+		                b2 = worldObj.getBlock(sn1 + x, sn3 - 1, sn2 + y);
+		
+		                if (b2 == Blocks.water || b2 == Blocks.flowing_water)
+		                {
+		                	worldObj.setBlock(sn1 + x, sn3 - 1, sn2 + y, Blocks.ice, 0, 0);
+		                }
+		
+		                if (Blocks.snow_layer.canPlaceBlockAt(worldObj, sn1 + x, sn3, sn2 + y) && b2 != Blocks.ice && b2 != Blocks.water && sn3 > 62)
+		                {
+		                	if(b1 != Blocks.snow_layer && b2 != Blocks.packed_ice)
+		                	{
+		                		worldObj.setBlock(sn1 + x, sn3, sn2 + y, Blocks.snow_layer, 0, 0);
+		                	}
+		                }
+	            	}
+	            }
+	        }
         }
 		
 

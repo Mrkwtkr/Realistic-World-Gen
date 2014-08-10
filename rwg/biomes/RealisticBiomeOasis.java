@@ -35,9 +35,9 @@ public class RealisticBiomeOasis extends BiomeGenBase implements RealisticBiome
 	}
 
 	@Override
-	public void rDecorate(World world, Random rand, int chunkX, int chunkY, PerlinNoise perlin) 
+	public void rDecorate(World world, Random rand, int chunkX, int chunkY, PerlinNoise perlin, float strength) 
 	{
-		if(rand.nextInt(2) == 0)
+		if(rand.nextInt((int)(2f / strength)) == 0)
 		{
 			int i1 = chunkX + rand.nextInt(16) + 8;
 			int j1 = chunkY + rand.nextInt(16) + 8;
@@ -48,7 +48,7 @@ public class RealisticBiomeOasis extends BiomeGenBase implements RealisticBiome
 		    }
 		}
 		
-		for(int b33 = 0; b33 < 12; b33++)
+		for(int b33 = 0; b33 < 12f * strength; b33++)
 		{
 			int j6 = chunkX + rand.nextInt(16) + 8;
 			int k10 = chunkY + rand.nextInt(16) + 8;
@@ -62,14 +62,14 @@ public class RealisticBiomeOasis extends BiomeGenBase implements RealisticBiome
 		    }
 		}
 
-		if(rand.nextInt(2) == 0) 
+		if(rand.nextInt((int)(2f / strength)) == 0) 
 		{
 			int i18 = chunkX + rand.nextInt(16) + 8;
 			int i23 = chunkY + rand.nextInt(16) + 8;
 			(new WorldGenReed()).generate(world, rand, i18, 60 + rand.nextInt(8), i23);
 		}
 		
-		for(int f23 = 0; f23 < 5; f23++)
+		for(int f23 = 0; f23 < 5f * strength; f23++)
 		{
 			int j15 = chunkX + rand.nextInt(16) + 8;
 			int j17 = rand.nextInt(128);
@@ -77,7 +77,7 @@ public class RealisticBiomeOasis extends BiomeGenBase implements RealisticBiome
 			(new DecoFlowers(new int[]{11,11,9,3,3,3,2,1,1})).generate(world, rand, j15, j17, j20);
 		}
 		
-		for(int k18 = 0; k18 < 15; k18++)
+		for(int k18 = 0; k18 < 15f * strength; k18++)
 		{
 			int k21 = chunkX + rand.nextInt(16) + 8;
 			int j23 = rand.nextInt(160);
@@ -85,7 +85,7 @@ public class RealisticBiomeOasis extends BiomeGenBase implements RealisticBiome
 			(new DecoCacti(true)).generate(world, rand, k21, j23, k24);
 		}
 		
-		for(int i15 = 0; i15 < 3; i15++)
+		for(int i15 = 0; i15 < 3f * strength; i15++)
 		{
 			int i17 = chunkX + rand.nextInt(16) + 8;
 			int i20 = rand.nextInt(160);
@@ -93,7 +93,7 @@ public class RealisticBiomeOasis extends BiomeGenBase implements RealisticBiome
 			(new WorldGenDeadBush(Blocks.deadbush)).generate(world, rand, i17, i20, l22);
 		}
 
-		for(int l14 = 0; l14 < 10; l14++)
+		for(int l14 = 0; l14 < 10f * strength; l14++)
 		{
 			int l19 = chunkX + rand.nextInt(16) + 8;
 			int k22 = rand.nextInt(50) + 50;
@@ -111,7 +111,7 @@ public class RealisticBiomeOasis extends BiomeGenBase implements RealisticBiome
 	}
 
 	@Override
-	public float rNoise(PerlinNoise perlin, int x, int y) 
+	public float rNoise(PerlinNoise perlin, int x, int y, float ocean) 
 	{
 		float m = perlin.noise2(x / 150f, y / 150f) * 100f;
 		float mh = perlin.noise2(x / 150f, y / 150f) * 50f + 10f;

@@ -32,9 +32,9 @@ public class RealisticBiomeCanyonForest extends BiomeGenBase implements Realisti
 	}
 
 	@Override
-	public void rDecorate(World world, Random rand, int chunkX, int chunkY, PerlinNoise perlin) 
+	public void rDecorate(World world, Random rand, int chunkX, int chunkY, PerlinNoise perlin, float strength) 
 	{
-		for (int l = 0; l < 1; ++l)
+		if(rand.nextInt((int)(1f / strength)) == 0)
 		{
 			int i1 = chunkX + rand.nextInt(16) + 8;
 			int j1 = chunkY + rand.nextInt(16) + 8;
@@ -45,7 +45,7 @@ public class RealisticBiomeCanyonForest extends BiomeGenBase implements Realisti
 			}
 		}
 		
-		for (int b1 = 0; b1 < 8; b1++)
+		for (int b1 = 0; b1 < 8f * strength; b1++)
 		{
 			int j6 = chunkX + rand.nextInt(16) + 8;
 			int k10 = chunkY + rand.nextInt(16) + 8;
@@ -65,14 +65,14 @@ public class RealisticBiomeCanyonForest extends BiomeGenBase implements Realisti
 			}
 		}
 		
-		if(rand.nextInt(3) == 0) 
+		if(rand.nextInt((int)(3f / strength)) == 0) 
 		{
 			int i18 = chunkX + rand.nextInt(16) + 8;
 			int i23 = chunkY + rand.nextInt(16) + 8;
 			(new WorldGenReed()).generate(world, rand, i18, 60 + rand.nextInt(8), i23);
 		}
 		
-		if(rand.nextInt(28) == 0)
+		if(rand.nextInt((int)(28f / strength)) == 0)
 		{
 			int j16 = chunkX + rand.nextInt(16) + 8;
 			int j18 = rand.nextInt(128);
@@ -80,7 +80,7 @@ public class RealisticBiomeCanyonForest extends BiomeGenBase implements Realisti
 			(new WorldGenPumpkin()).generate(world, rand, j16, j18, j21);
 		}
 		
-		for(int i15 = 0; i15 < 5; i15++)
+		for(int i15 = 0; i15 < 5f * strength; i15++)
 		{
 			int i17 = chunkX + rand.nextInt(16) + 8;
 			int i20 = rand.nextInt(160);
@@ -88,7 +88,7 @@ public class RealisticBiomeCanyonForest extends BiomeGenBase implements Realisti
 			(new WorldGenDeadBush(Blocks.deadbush)).generate(world, rand, i17, i20, l22);
 		}
 		
-		for(int k18 = 0; k18 < 25; k18++)
+		for(int k18 = 0; k18 < 25f * strength; k18++)
 		{
 			int k21 = chunkX + rand.nextInt(16) + 8;
 			int j23 = rand.nextInt(160);
@@ -96,7 +96,7 @@ public class RealisticBiomeCanyonForest extends BiomeGenBase implements Realisti
 			(new DecoCacti(true)).generate(world, rand, k21, j23, k24);
 		}
 		
-		for(int f23 = 0; f23 < 5; f23++)
+		for(int f23 = 0; f23 < 5f * strength; f23++)
 		{
 			int j15 = chunkX + rand.nextInt(16) + 8;
 			int j17 = rand.nextInt(128);
@@ -107,7 +107,7 @@ public class RealisticBiomeCanyonForest extends BiomeGenBase implements Realisti
 			}
 		}
 		
-		for(int l14 = 0; l14 < 15; l14++)
+		for(int l14 = 0; l14 < 15f * strength; l14++)
 		{
 			int l19 = chunkX + rand.nextInt(16) + 8;
 			int k22 = rand.nextInt(128);
@@ -119,7 +119,7 @@ public class RealisticBiomeCanyonForest extends BiomeGenBase implements Realisti
 			}
 		}
 		
-        for (int l15 = 0; l15 < 5; l15++)
+        for (int l15 = 0; l15 < 5f * strength; l15++)
         {
             int x34 = chunkX + rand.nextInt(16) + 8;
             int y34 = 62;
@@ -130,7 +130,7 @@ public class RealisticBiomeCanyonForest extends BiomeGenBase implements Realisti
 	}
 
 	@Override
-	public float rNoise(PerlinNoise perlin, int x, int y) 
+	public float rNoise(PerlinNoise perlin, int x, int y, float ocean) 
 	{
 		float b = perlin.noise2(x / 160f, y / 160f) * 60f;
 		b *= b / 40f;
