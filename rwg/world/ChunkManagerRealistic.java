@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import rwg.biomes.BiomeList;
-import rwg.biomes.RealisticBiome;
+import rwg.biomes.realistic.RealisticBiomeBase;
+import rwg.util.CellNoise;
 import rwg.util.PerlinNoise;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
@@ -20,11 +20,9 @@ public class ChunkManagerRealistic extends WorldChunkManager
     private List biomesToSpawnIn;
 
     private PerlinNoise perlin;
-    private int biomeLength;
+    private CellNoise cell;
     
-    private BiomeLayer biomeLayerLand;
-    private BiomeLayer biomeLayerCoast;
-    private BiomeLayer biomeLayerOcean;
+    private int biomeLength;
 	
 	protected ChunkManagerRealistic()
 	{
@@ -36,19 +34,10 @@ public class ChunkManagerRealistic extends WorldChunkManager
     {
         this();
         long seed = par1World.getSeed();
+        
     	perlin = new PerlinNoise(seed);
-    	
-    	biomeLayerLand = new BiomeLayer();
-    	biomeLayerLand.addBiome(0.5f, 0.5f, BiomeList.REALISTICtaiga);
-    	biomeLayerLand.calculate();
-    	
-    	biomeLayerCoast = new BiomeLayer();
-    	biomeLayerCoast.addBiome(0.5f, 0.5f, BiomeList.REALISTICcoastFjords);
-    	biomeLayerCoast.calculate();
-    	
-    	biomeLayerOcean = new BiomeLayer();
-    	biomeLayerOcean.addBiome(0.5f, 0.5f, BiomeList.fakeOcean);
-    	biomeLayerOcean.calculate();
+    	cell = new CellNoise(seed, (short)0);
+    	cell.setUseDistance(true);
     }    
 	
     public int[] getBiomesGens(int par1, int par2, int par3, int par4)
@@ -65,6 +54,20 @@ public class ChunkManagerRealistic extends WorldChunkManager
     	return d;
     }
     
+    public RealisticBiomeBase[] getBiomesGensData(int par1, int par2, int par3, int par4)
+    {	
+    	RealisticBiomeBase[] data = new RealisticBiomeBase[par3 * par4];
+    	
+		for(int i = 0; i < par3; i++)
+		{
+			for(int j = 0; j < par4; j++)
+    		{
+    			data[j * par3 + i] = getBiomeDataAt(par1 + i, par2 + j);
+    		}
+		}
+    	return data;
+    }
+    
     public float getOceanValue(int x, int y)
     {
     	return 1f;// 0.5f + perlin.noise2(x / 2000f, y / 2000f);
@@ -72,12 +75,17 @@ public class ChunkManagerRealistic extends WorldChunkManager
 
     public BiomeGenBase getBiomeGenAt(int par1, int par2)
     {
-    	return getBiomeGenAt(par1, par2, getOceanValue(par1, par2));
+    	return getBiomeDataAt(par1, par2, getOceanValue(par1, par2)).baseBiome;
     }
     
-    public BiomeGenBase getBiomeGenAt(int par1, int par2, float ocean)
+    public RealisticBiomeBase getBiomeDataAt(int par1, int par2)
     {
-    	return biomeLayerLand.getBiome(1f, 1f);
+    	return getBiomeDataAt(par1, par2, getOceanValue(par1, par2));
+    }
+    
+    public RealisticBiomeBase getBiomeDataAt(int par1, int par2, float ocean)
+    {
+    	return RealisticBiomeBase.landTaigaHills;
     	/*float temp = 0.5f + perlin.noise2(par1 / 500f, par2 / 500f);
     	float hum = 0.5f + perlin.noise2(par1 / 500f, par2 / 500f);
     	
@@ -102,7 +110,7 @@ public class ChunkManagerRealistic extends WorldChunkManager
     public float getNoiseAt(int x, int y)
     {
     	float ocean = getOceanValue(x, y);
-    	return ((RealisticBiome)getBiomeGenAt(x, y)).rNoise(perlin, x, y, ocean);
+    	return getBiomeDataAt(x, y, ocean).rNoise(perlin, cell, x, y, ocean);
     }
     
     public List getBiomesToSpawnIn()

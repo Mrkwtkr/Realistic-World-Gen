@@ -5,8 +5,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import rwg.biomes.RealisticBiome;
+import rwg.biomes.realistic.RealisticBiomeBase;
+import rwg.map.MapGenAncientVillage;
 import rwg.util.CanyonColor;
+import rwg.util.CellNoise;
 import rwg.util.PerlinNoise;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFalling;
@@ -45,17 +47,19 @@ public class ChunkGeneratorRealistic implements IChunkProvider
     private Random rand;
 	
     private World worldObj;
+    private ChunkManagerRealistic cmr;
     private MapGenCaves caves;
     private MapGenStronghold strongholdGenerator = new MapGenStronghold();
     private MapGenMineshaft mineshaftGenerator = new MapGenMineshaft();
     private MapGenVillage villageGenerator;
     
-    private BiomeGenBase biomesForGeneration[];
+    private PerlinNoise perlin;
+    private CellNoise cell;
+    
+    private RealisticBiomeBase biomesForGeneration[];
     private final int biomesForGenLength;
     
-    private PerlinNoise perlin;
-    
-    private final int parabolicSize = 16;
+    private final int parabolicSize = 24;
     private final int parabolicArraySize;
     private final float[] parabolicField;
     private float parabolicFieldTotal;
@@ -64,8 +68,12 @@ public class ChunkGeneratorRealistic implements IChunkProvider
     {
     	caves = new MapGenCaves();
         worldObj = world;
+        cmr = (ChunkManagerRealistic)worldObj.getWorldChunkManager();
+        
         rand = new Random(l);
         perlin = new PerlinNoise(l);
+    	cell = new CellNoise(l, (short)0);
+    	cell.setUseDistance(true);
         
         //Map m = new HashMap();
         //m.put("size", "0");
@@ -81,7 +89,7 @@ public class ChunkGeneratorRealistic implements IChunkProvider
         {
             for (int k = -parabolicSize; k <= parabolicSize; ++k)
             {
-                float f = 0.445f / MathHelper.sqrt_float((float)(j * j * + k * k) + 0.2F);
+                float f = 0.445f / MathHelper.sqrt_float((float)((j * 1) * (j * 1) + (k * 1) * (k * 1)) + 0.3F);
                 parabolicField[j + parabolicSize + (k + parabolicSize) * parabolicArraySize] = f;
                 parabolicFieldTotal += f;
             }
@@ -94,8 +102,7 @@ public class ChunkGeneratorRealistic implements IChunkProvider
         Block[] blocks = new Block[65536];
         byte[] metadata = new byte[65536];
         float[] noise = new float[256];
-        ChunkManagerRealistic cmr = (ChunkManagerRealistic)worldObj.getWorldChunkManager();
-        biomesForGeneration = cmr.loadBlockGeneratorData(biomesForGeneration, cx * 16 - parabolicSize, cy * 16 - parabolicSize, biomesForGenLength, biomesForGenLength);
+        biomesForGeneration = cmr.getBiomesGensData(cx * 16 - parabolicSize, cy * 16 - parabolicSize, biomesForGenLength, biomesForGenLength);
     	
         generateTerrain(cmr, cx, cy, blocks, metadata, biomesForGeneration, noise);
         replaceBlocksForBiome(cx, cy, blocks, metadata, biomesForGeneration, noise);
@@ -109,13 +116,13 @@ public class ChunkGeneratorRealistic implements IChunkProvider
         byte[] abyte1 = chunk.getBiomeArray();
         for (int k = 0; k < abyte1.length; ++k)
         {
-            abyte1[k] = (byte)this.biomesForGeneration[((k >> 4) + parabolicSize) * biomesForGenLength + ((k & 0xf) + parabolicSize)].biomeID;
+            abyte1[k] = (byte)this.biomesForGeneration[((k >> 4) + parabolicSize) * biomesForGenLength + ((k & 0xf) + parabolicSize)].baseBiome.biomeID;
         }
         chunk.generateSkylightMap();
         return chunk;
     }
     
-    public void generateTerrain(ChunkManagerRealistic cmr, int cx, int cy, Block[] blocks, byte[] metadata, BiomeGenBase biomes[], float[] n)
+    public void generateTerrain(ChunkManagerRealistic cmr, int cx, int cy, Block[] blocks, byte[] metadata, RealisticBiomeBase biomes[], float[] n)
     {	
     	int p;
     	float[] noise;
@@ -164,8 +171,8 @@ public class ChunkGeneratorRealistic implements IChunkProvider
     		}
     	}
     }
-    
-    public float[] getNoise(ChunkManagerRealistic cmr, int a, int b, int x, int y, BiomeGenBase biomes[])
+
+    public float[] getNoise(ChunkManagerRealistic cmr, int a, int b, int x, int y, RealisticBiomeBase biomes[])
     {
     	float[] noiseArray = new float[256];
     	for(int i = -parabolicSize; i <= parabolicSize; i++)
@@ -185,7 +192,7 @@ public class ChunkGeneratorRealistic implements IChunkProvider
     	{
     		if(noiseArray[k] > 0.0f)
     		{
-    			noise += ((RealisticBiome)BiomeGenBase.getBiome(k)).rNoise(perlin, x, y, ocean) * noiseArray[k];
+    			noise += ((RealisticBiomeBase)RealisticBiomeBase.getBiome(k)).rNoise(perlin, cell, x, y, ocean) * noiseArray[k];
     		}
     	}
     	
@@ -193,23 +200,23 @@ public class ChunkGeneratorRealistic implements IChunkProvider
     	{
     		if(noiseArray[k] > 0.0f)
     		{
-    			noise3D += ((RealisticBiome)BiomeGenBase.getBiome(k)).r3Dnoise(noise) * noiseArray[k];
+    			noise3D += ((RealisticBiomeBase)RealisticBiomeBase.getBiome(k)).r3Dnoise(noise) * noiseArray[k];
     		}
     	}
     	
     	return new float[]{noise, noise3D};
     }
 
-    public void replaceBlocksForBiome(int cx, int cy, Block[] blocks, byte[] metadata, BiomeGenBase biomes[], float[] n)
+    public void replaceBlocksForBiome(int cx, int cy, Block[] blocks, byte[] metadata, RealisticBiomeBase biomes[], float[] n)
     {
     	for(int i = 0; i < 16; i++)
     	{
     		for(int j = 0; j < 16; j++)
     		{
-    			BiomeGenBase biome = biomes[(parabolicSize + i) * biomesForGenLength + (parabolicSize + j)];
+    			RealisticBiomeBase biome = biomes[(parabolicSize + i) * biomesForGenLength + (parabolicSize + j)];
     			int depth = -1;
                 
-    			((RealisticBiome)biome).rReplace(blocks, metadata, cx * 16 + j, cy * 16 + i, i, j, depth, rand, perlin, n);
+    			((RealisticBiomeBase)biome).rReplace(blocks, metadata, cx * 16 + j, cy * 16 + i, i, j, depth, rand, perlin, cell, n);
     			
     			blocks[(j * 16 + i) * 256] = Blocks.bedrock;
     		}
@@ -236,7 +243,7 @@ public class ChunkGeneratorRealistic implements IChunkProvider
         BlockFalling.fallInstantly = true;
         int x = i * 16;
         int y = j * 16;
-        BiomeGenBase biomegenbase = this.worldObj.getBiomeGenForCoords(x + 16, y + 16);
+        RealisticBiomeBase biome = cmr.getBiomeDataAt(x + 16, y + 16);
         this.rand.setSeed(this.worldObj.getSeed());
         long i1 = this.rand.nextLong() / 2L * 2L + 1L;
         long j1 = this.rand.nextLong() / 2L * 2L + 1L;
@@ -373,11 +380,11 @@ public class ChunkGeneratorRealistic implements IChunkProvider
         {
         	for(int by = -4; by <= 4; by++)
         	{
-        		biomeNoise[worldObj.getBiomeGenForCoords(x + 24 + bx * 16, y + 24 + by * 16).biomeID] += 0.01234569f;
+        		biomeNoise[cmr.getBiomeDataAt(x + 24 + bx * 16, y + 24 + by * 16).biomeID] += 0.01234569f;
         	}
         }
         
-        BiomeGenBase biome;
+        RealisticBiomeBase b;
         float snow = 0f;
         for(int bn = 0; bn < 256; bn++)
         {
@@ -387,10 +394,10 @@ public class ChunkGeneratorRealistic implements IChunkProvider
         		{
         			biomeNoise[bn] = 1f;
         		}
-        		biome = BiomeGenBase.getBiome(bn);
-                ((RealisticBiome)biome).rDecorate(this.worldObj, this.rand, x, y, perlin, biomeNoise[bn]);
+        		b = RealisticBiomeBase.getBiome(bn);
+                b.rDecorate(this.worldObj, this.rand, x, y, perlin, cell, biomeNoise[bn]);
                 
-                if(biome.temperature < 0.15f)
+                if(b.baseBiome.temperature < 0.15f)
                 {
                 	snow -= 0.6f * biomeNoise[bn];
                 }
@@ -417,7 +424,7 @@ public class ChunkGeneratorRealistic implements IChunkProvider
 			(new WorldGenLiquids(Blocks.flowing_lava)).generate(worldObj, rand, i22, l23, i25);
 		}
         
-        SpawnerAnimals.performWorldGenSpawning(this.worldObj, biomegenbase, x + 8, y + 8, 16, 16, this.rand);
+        SpawnerAnimals.performWorldGenSpawning(this.worldObj, biome.baseBiome, x + 8, y + 8, 16, 16, this.rand);
 
         MinecraftForge.EVENT_BUS.post(new PopulateChunkEvent.Post(ichunkprovider, worldObj, rand, i, j, flag));
 
