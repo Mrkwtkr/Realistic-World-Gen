@@ -32,7 +32,7 @@ public class RealisticBiomeGlacier extends RealisticBiomeBase
     }
 
     @Override
-    public float rNoise(PerlinNoise perlin, CellNoise cell, int x, int y, float ocean)
+    public float rNoise(PerlinNoise perlin, CellNoise cell, int x, int y, float ocean, float border)
     {
     	if(subID == 0) //HIGH
     	{

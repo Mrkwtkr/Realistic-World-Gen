@@ -67,16 +67,23 @@ public class DecoPalmTree extends WorldGenerator
 	};
 	
 	private int height;
+	private boolean sand;
 	
 	public DecoPalmTree(int h)
 	{
+		this(h, true);
+	}
+	
+	public DecoPalmTree(int h, boolean s)
+	{
 		height = h;
+		sand = s;
 	}
 
     public boolean generate(World world, Random rand, int x, int y, int z)
     {
     	Block b = world.getBlock(x, y - 1, z);
-    	if(b != Blocks.grass && b != Blocks.dirt && b != Blocks.sand)
+    	if((b != Blocks.grass && b != Blocks.dirt && b != Blocks.sand) || (b == Blocks.sand && !sand))
     	{
     		return false;
     	}

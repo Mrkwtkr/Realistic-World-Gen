@@ -56,10 +56,12 @@ public class ChunkGeneratorRealistic implements IChunkProvider
     private PerlinNoise perlin;
     private CellNoise cell;
     
-    private RealisticBiomeBase biomesForGeneration[];
-    private final int biomesForGenLength;
+	private RealisticBiomeBase biomesForGeneration[];
     
-    private final int parabolicSize = 24;
+    private final int sampleSize = 8;
+    private final int sampleArraySize;
+    
+    private final int parabolicSize;
     private final int parabolicArraySize;
     private final float[] parabolicField;
     private float parabolicFieldTotal;
@@ -82,8 +84,10 @@ public class ChunkGeneratorRealistic implements IChunkProvider
         
         CanyonColor.init(l);
 
+        sampleArraySize = sampleSize * 2 + 5;
+        
+        parabolicSize = sampleSize;
         parabolicArraySize = parabolicSize * 2 + 1;
-        biomesForGenLength = parabolicArraySize + 15;
         parabolicField = new float[parabolicArraySize * parabolicArraySize];
         for (int j = -parabolicSize; j <= parabolicSize; ++j)
         {
@@ -102,7 +106,7 @@ public class ChunkGeneratorRealistic implements IChunkProvider
         Block[] blocks = new Block[65536];
         byte[] metadata = new byte[65536];
         float[] noise = new float[256];
-        biomesForGeneration = cmr.getBiomesGensData(cx * 16 - parabolicSize, cy * 16 - parabolicSize, biomesForGenLength, biomesForGenLength);
+        biomesForGeneration = cmr.getBiomesGensData(cx * 16, cy * 16, 16, 16);
     	
         generateTerrain(cmr, cx, cy, blocks, metadata, biomesForGeneration, noise);
         replaceBlocksForBiome(cx, cy, blocks, metadata, biomesForGeneration, noise);
@@ -116,7 +120,7 @@ public class ChunkGeneratorRealistic implements IChunkProvider
         byte[] abyte1 = chunk.getBiomeArray();
         for (int k = 0; k < abyte1.length; ++k)
         {
-            abyte1[k] = (byte)this.biomesForGeneration[((k >> 4) + parabolicSize) * biomesForGenLength + ((k & 0xf) + parabolicSize)].baseBiome.biomeID;
+            abyte1[k] = (byte)this.biomesForGeneration[parabolicSize * 16 + parabolicSize].baseBiome.biomeID;
         }
         chunk.generateSkylightMap();
         return chunk;
@@ -124,18 +128,19 @@ public class ChunkGeneratorRealistic implements IChunkProvider
     
     public void generateTerrain(ChunkManagerRealistic cmr, int cx, int cy, Block[] blocks, byte[] metadata, RealisticBiomeBase biomes[], float[] n)
     {	
-    	int p;
-    	float[] noise;
+    	int p, h;
+    	float[] noise = getNewNoise(cmr, cx * 16, cy * 16);
     	float noise3;
     	for(int i = 0; i < 16; i++)
     	{
     		for(int j = 0; j < 16; j++)
     		{
-    			noise = getNoise(cmr, i, j, cx * 16 + j, cy * 16 + i, biomes);
+    			h = (int)noise[j * 16 + i];
+    			
     			for(int k = 0; k < 256; k++)
     			{
     				p = (j * 16 + i) * 256 + k;
-    				if(k > noise[0] + noise[1])
+    				if(k > h)
     				{
     					if(k < 63)
         				{
@@ -146,7 +151,7 @@ public class ChunkGeneratorRealistic implements IChunkProvider
         					blocks[p] = Blocks.air;
         				}
     				}
-    				else if(k <= noise[0] + noise[1] * 6 && k >= noise[0] - noise[1] * 6)
+    				/*else if(k <= noise[0] + noise[1] * 6 && k >= noise[0] - noise[1] * 6)
     				{
         				noise3 = perlin.noise3((cx * 16 + j) / 20f, (cy * 16 + i) / 20f, k / 20f) + (noise[0] - k) / (noise[1] * 2);
         				if(noise3 > 0f)
@@ -162,49 +167,178 @@ public class ChunkGeneratorRealistic implements IChunkProvider
         					blocks[p] = Blocks.air;
         				}
     				}
-    				else if(k < noise[0] - noise[1])
+    				else if(k < noise[0] - noise[1])*/
+    				else 
     				{
     					blocks[p] = Blocks.stone;
     				}
     			}
-    			n[j * 16 + i] = noise[0];
+    			n[j * 16 + i] = noise[j * 16 + i];
     		}
     	}
     }
-
-    public float[] getNoise(ChunkManagerRealistic cmr, int a, int b, int x, int y, RealisticBiomeBase biomes[])
+    
+    public float[] getNewNoise(ChunkManagerRealistic cmr, int x, int y)
     {
-    	float[] noiseArray = new float[256];
-    	for(int i = -parabolicSize; i <= parabolicSize; i++)
+    	int i, j, k, l, m, n, p;
+    	
+    	int[] biomeData = new int[sampleArraySize * sampleArraySize];
+    	for(i = -sampleSize; i < sampleSize + 5; i++)
     	{
-        	for(int j = -parabolicSize; j <= parabolicSize; j++)
+    		for(j = -sampleSize; j < sampleSize + 5; j++)
+    		{
+    			biomeData[(i + sampleSize) * sampleArraySize + (j + sampleSize)] = cmr.getBiomeDataAt(x + ((i * 8) - 8), y + ((j * 8) - 8)).biomeID;
+    		}
+    	}
+    	
+    	float[][] hugeRender = new float[81][256];
+    	float[][] smallRender = new float[625][256];
+    	for(i = -1; i < 4; i++)
+    	{
+        	for(j = -1; j < 4; j++)
         	{
-        		noiseArray[biomes[(parabolicSize + a + i) * biomesForGenLength + (parabolicSize + b + j)].biomeID] += parabolicField[i + parabolicSize + (j + parabolicSize) * parabolicArraySize] / parabolicFieldTotal;
+        		for(k = -parabolicSize; k <= parabolicSize; k++)
+        		{
+        			for(l = -parabolicSize; l <= parabolicSize; l++)
+        			{
+        				hugeRender[(i * 2 + 2) * 9 + (j * 2 + 2)][biomeData[(i + k + sampleSize + 1) * sampleArraySize + (j + l + sampleSize + 1)]] += parabolicField[k + parabolicSize + (l + parabolicSize) * parabolicArraySize] / parabolicFieldTotal;
+        			}
+        		}
+        		
         	}
     	}
+    	biomeData = null;
     	
-    	float noise = 0f;
-    	float noise3D = 0f;
-    	float ocean = cmr.getOceanValue(x, y);
-    	
-    	int k;
-    	for(k = 0; k < 256; k++)
+    	//RENDER HUGE 1
+    	for(i = 0; i < 4; i++)
     	{
-    		if(noiseArray[k] > 0.0f)
+    		for(j = 0; j < 4; j++)
     		{
-    			noise += ((RealisticBiomeBase)RealisticBiomeBase.getBiome(k)).rNoise(perlin, cell, x, y, ocean) * noiseArray[k];
+    			hugeRender[(i * 2 + 1) * 9 + (j * 2 + 1)] = mix4(new float[][]{
+					hugeRender[(i * 2) * 9 + (j * 2)], 
+					hugeRender[(i * 2 + 2) * 9 + (j * 2)], 
+					hugeRender[(i * 2) * 9 + (j * 2 + 2)], 
+					hugeRender[(i * 2 + 2) * 9 + (j * 2 + 2)]});
+    		} 
+    	}
+    	
+    	//RENDER HUGE 2
+    	for(i = 0; i < 7; i++)
+    	{
+    		for(j = 0; j < 7; j++)
+    		{
+    			if(!(i % 2 == 0 && j % 2 == 0) && !(i % 2 != 0 && j % 2 != 0))
+    			{
+    				smallRender[(i * 4) * 25 + (j * 4)] = mix4(new float[][]{
+						hugeRender[(i) * 9 + (j + 1)], 
+						hugeRender[(i + 1) * 9 + (j)], 
+						hugeRender[(i + 1) * 9 + (j + 2)], 
+						hugeRender[(i + 2) * 9 + (j + 1)]});
+    			}
+    			else
+    			{
+    				smallRender[(i * 4) * 25 + (j * 4)] = hugeRender[(i + 1) * 9 + (j + 1)];
+    			}
+    		} 
+    	}
+    	hugeRender = null;
+    	
+    	//RENDER SMALL 1
+    	for(i = 0; i < 6; i++)
+    	{
+    		for(j = 0; j < 6; j++)
+    		{
+    			smallRender[(i * 4 + 2) * 25 + (j * 4 + 2)] = mix4(new float[][]{
+    				smallRender[(i * 4) * 25 + (j * 4)], 
+    				smallRender[(i * 4 + 4) * 25 + (j * 4)], 
+    				smallRender[(i * 4) * 25 + (j * 4 + 4)], 
+    				smallRender[(i * 4 + 4) * 25 + (j * 4 + 4)]});
+    		} 
+    	}
+    	
+    	//RENDER SMALL 2
+    	for(i = 0; i < 11; i++)
+    	{
+    		for(j = 0; j < 11; j++)
+    		{
+    			if(!(i % 2 == 0 && j % 2 == 0) && !(i % 2 != 0 && j % 2 != 0))
+    			{
+    				smallRender[(i * 2 + 2) * 25 + (j * 2 + 2)] = mix4(new float[][]{
+    					smallRender[(i * 2) * 25 + (j * 2 + 2)], 
+    					smallRender[(i * 2 + 2) * 25 + (j * 2)], 
+    					smallRender[(i * 2 + 2) * 25 + (j * 2 + 4)], 
+    					smallRender[(i * 2 + 4) * 25 + (j * 2 + 2)]});
+    			}
+    		} 
+    	}
+    	
+    	//RENDER SMALL 3
+    	for(i = 0; i < 9; i++)
+    	{
+    		for(j = 0; j < 9; j++)
+    		{
+    			smallRender[(i * 2 + 3) * 25 + (j * 2 + 3)] = mix4(new float[][]{
+        				smallRender[(i * 2 + 2) * 25 + (j * 2 + 2)], 
+        				smallRender[(i * 2 + 4) * 25 + (j * 2 + 2)], 
+        				smallRender[(i * 2 + 2) * 25 + (j * 2 + 4)], 
+        				smallRender[(i * 2 + 4) * 25 + (j * 2 + 4)]});
+    		} 
+    	}
+    	
+    	//RENDER SMALL 4
+    	for(i = 0; i < 16; i++)
+    	{
+    		for(j = 0; j < 16; j++)
+    		{
+    			if(!(i % 2 == 0 && j % 2 == 0) && !(i % 2 != 0 && j % 2 != 0))
+    			{
+    				smallRender[(i + 4) * 25 + (j + 4)] = mix4(new float[][]{
+    					smallRender[(i + 3) * 25 + (j + 4)], 
+    					smallRender[(i + 4) * 25 + (j + 3)], 
+    					smallRender[(i + 4) * 25 + (j + 5)], 
+    					smallRender[(i + 5) * 25 + (j + 4)]});
+    			}
     		}
     	}
     	
-    	for(k = 0; k < 256; k++)
+    	
+    	float[] testHeight = new float[256];
+    	for(i = 0; i < 16; i++)
     	{
-    		if(noiseArray[k] > 0.0f)
+    		for(j = 0; j < 16; j++)
     		{
-    			noise3D += ((RealisticBiomeBase)RealisticBiomeBase.getBiome(k)).r3Dnoise(noise) * noiseArray[k];
+    			float ocean = cmr.getOceanValue(x, y);
+    			l = ((int)(i + 4) * 25 + (j + 4));
+    			
+    			for(k = 0; k < 256; k++)
+    			{
+    				if(smallRender[l][k] > 0f)
+    				{
+    					testHeight[i * 16 + j] += ((RealisticBiomeBase)RealisticBiomeBase.getBiome(k)).rNoise(perlin, cell, x + i, y + j, ocean, smallRender[l][k]) * smallRender[l][k];
+    				}
+    			}
     		}
     	}
     	
-    	return new float[]{noise, noise3D};
+    	return testHeight;
+    }
+    
+    public float[] mix4(float[][] ingredients)
+    {
+    	float[] result = new float[256];
+    	int i, j;
+    	for(i = 0; i < 256; i++)
+    	{
+    		for(j = 0; j < 4; j++)
+    		{
+    			if(ingredients[j][i] > 0f)
+    			{
+    				result[i] += ingredients[j][i] / 4f;
+    			}
+    		}
+    	}
+    	
+    	return result;
     }
 
     public void replaceBlocksForBiome(int cx, int cy, Block[] blocks, byte[] metadata, RealisticBiomeBase biomes[], float[] n)
@@ -213,7 +347,7 @@ public class ChunkGeneratorRealistic implements IChunkProvider
     	{
     		for(int j = 0; j < 16; j++)
     		{
-    			RealisticBiomeBase biome = biomes[(parabolicSize + i) * biomesForGenLength + (parabolicSize + j)];
+    			RealisticBiomeBase biome = biomes[i * 16 + j];
     			int depth = -1;
                 
     			((RealisticBiomeBase)biome).rReplace(blocks, metadata, cx * 16 + j, cy * 16 + i, i, j, depth, rand, perlin, cell, n);

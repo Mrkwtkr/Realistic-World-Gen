@@ -204,12 +204,13 @@ public class RealisticBiomeTundra extends RealisticBiomeBase
     }
 
     @Override
-    public float rNoise(PerlinNoise perlin, CellNoise cell, int x, int y, float ocean)
+    public float rNoise(PerlinNoise perlin, CellNoise cell, int x, int y, float ocean, float border)
     {
     	if(subID == 0) //Hills
     	{
-    		float h = perlin.noise2(x / 300f, y / 300f) * 125f;
+    		float h = perlin.noise2(x / 300f, y / 300f) * 125f;// (35f + 90f * border);
     		h *= h / 32f;
+			h = h > 200f ? 200f : h;
 
     		if(h > 2f)
     		{

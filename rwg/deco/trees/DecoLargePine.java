@@ -8,44 +8,59 @@ import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenerator;
 
-public class DecoSmallPine extends WorldGenerator
+public class DecoLargePine extends WorldGenerator
 {
 	private int startHeight;
 	private int treeSize;
-	private int metadata;
 	
-	public DecoSmallPine(int start, int s)
-	{
-		this(start, s, 1);
-	}
-	
-	public DecoSmallPine(int start, int s, int m)
+	public DecoLargePine(int start, int s)
 	{
 		startHeight = start;
 		treeSize = s;
-		metadata = m;
 	}
 	
     public boolean generate(World world, Random rand, int x, int y, int z)
     {
+    	int startY = y;
+    	
     	Block g = world.getBlock(x, y - 1, z);
     	if(g != Blocks.grass && g != Blocks.dirt)
     	{
     		return false;
     	}
     	
+    	buildBranch(world, rand, x + 1, y, z);
+    	buildBranch(world, rand, x - 1, y, z);
+    	buildBranch(world, rand, x, y, z + 1);
+    	buildBranch(world, rand, x, y, z - 1);
+    	
     	int i;
     	for(i = 0; i < startHeight; i++)
     	{
-    		world.setBlock(x, y, z, Blocks.log, metadata, 0);
+    		world.setBlock(x, y, z, Blocks.log, 0, 0);
+    		if(i > 5 && rand.nextInt(7) == 0)
+    		{
+    			int dX = -1 + rand.nextInt(3);
+    			int dZ = -1 + rand.nextInt(3);
+    			
+    			if(dX == 0 && dZ == 0)
+    			{
+    				dX = -1 + rand.nextInt(3);
+    				dZ = -1 + rand.nextInt(3);
+    			}
+    			
+    			buildBranch(world, rand, x, y, z, dX, dZ, 1, 1);
+    		}
+    		
     		y++;
     	}
     	
     	int pX = 0;
     	int pZ = 0;
+    	int j;
     	for(i = 0; i < treeSize; i++)
     	{
-    		if(rand.nextInt(1) == 0 && i < treeSize - 2)
+    		if(rand.nextInt(i < treeSize - 12 && i > 2 ? 2 : 1) == 0 && i < treeSize - 2)
     		{
     			int dX = -1 + rand.nextInt(3);
     			int dZ = -1 + rand.nextInt(3);
@@ -68,9 +83,12 @@ public class DecoSmallPine extends WorldGenerator
     			pX = dX;
     			pZ = dZ;
 
-        		buildBranch(world, rand, x, y, z, dX, dZ, i < treeSize - 10 ? 2 : 1, i < treeSize - 6 ? 2 : 1);
+        		buildBranch(world, rand, x, y, z, dX, dZ, 
+        			i < treeSize - 12 && i > 3 ? 3 : i < treeSize - 8 ? 2 : 1, 
+        			i < treeSize - 5 ? 2 : 1
+        		);
     		}
-    		world.setBlock(x, y, z, Blocks.log, metadata, 0);
+    		world.setBlock(x, y, z, Blocks.log, 0, 0);
     		
     		if(i < treeSize - 2)
 	    	{
@@ -94,6 +112,11 @@ public class DecoSmallPine extends WorldGenerator
     
     public void buildBranch(World world, Random rand, int x, int y, int z, int dX, int dZ, int logLength, int leaveSize)
     {
+    	if(logLength == 3 && Math.abs(dX) + Math.abs(dZ) == 2)
+    	{
+    		logLength--;
+    	}
+    	
     	for(int i = -1; i <= 1; i++)
     	{
     		for(int j = -1; j <= 1; j++)
@@ -110,7 +133,7 @@ public class DecoSmallPine extends WorldGenerator
     	
     	for(int m = 1; m <= logLength; m++)
     	{
-        	world.setBlock(x + (dX * m), y, z + (dZ * m), Blocks.log, metadata, 0);
+        	world.setBlock(x + (dX * m), y, z + (dZ * m), Blocks.log, 0, 0);
     	}
     }
     
@@ -119,7 +142,16 @@ public class DecoSmallPine extends WorldGenerator
     	Block b = world.getBlock(x, y, z);
     	if(b.getMaterial() == Material.air)
     	{
-    		world.setBlock(x, y, z, Blocks.leaves, metadata, 0);
+    		world.setBlock(x, y, z, Blocks.leaves, 0, 0);
+    	}
+    }
+    
+    public void buildBranch(World world, Random rand, int x, int y, int z)
+    {
+    	int h = 4 + rand.nextInt(12);
+    	for(int i = -1; i < h; i++)
+    	{
+    		world.setBlock(x, y + i, z, Blocks.log, 12, 0);
     	}
     }
 }

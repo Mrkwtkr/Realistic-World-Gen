@@ -7,6 +7,8 @@ import rwg.deco.DecoBlob;
 import rwg.deco.DecoFlowers;
 import rwg.deco.DecoGrass;
 import rwg.deco.DecoWildWheat;
+import rwg.deco.trees.DecoShrub;
+import rwg.deco.trees.DecoSmallPine;
 import rwg.deco.trees.DecoSmallSpruce;
 import rwg.deco.trees.DecoPineTree;
 import rwg.util.CellNoise;
@@ -31,264 +33,167 @@ public class RealisticBiomeSnow extends RealisticBiomeBase
 	
 	@Override
     public void rDecorate(World world, Random rand, int chunkX, int chunkY, PerlinNoise perlin, CellNoise cell, float strength)
-    {
-		if(subID == 0) //Hills
+    {			
+		//boulders
+		for (int l = 0; l < 6f * strength; ++l)
 		{
-			//boulders
-			for (int l = 0; l < 8f * strength; ++l)
+			int i1 = chunkX + rand.nextInt(16) + 8;
+			int j1 = chunkY + rand.nextInt(16) + 8;
+		    int k1 = world.getHeightValue(i1, j1);
+			if(k1 < 95 && (k1 < 64 || rand.nextInt(15) == 0))
 			{
-				int i1 = chunkX + rand.nextInt(16) + 8;
-				int j1 = chunkY + rand.nextInt(16) + 8;
-			    int k1 = world.getHeightValue(i1, j1);
-				if(k1 < 95 && (k1 < 64 || rand.nextInt(15) == 0))
-				{
-			    	(new DecoBlob(Blocks.mossy_cobblestone, 0)).generate(world, rand, i1, k1, j1);
-				}
+		    	(new DecoBlob(Blocks.mossy_cobblestone, 0)).generate(world, rand, i1, k1, j1);
 			}
-			
+		}
+		
+		if(rand.nextInt((int)(25f / strength)) == 0)
+		{
+			int j16 = chunkX + rand.nextInt(16) + 8;
+			int j18 = rand.nextInt(128);
+			int j21 = chunkY + rand.nextInt(16) + 8;
+			(new WorldGenPumpkin()).generate(world, rand, j16, j18, j21);
+		}
+		
+		for(int f23 = 0; f23 < 2f * strength; f23++)
+		{
+			int j15 = chunkX + rand.nextInt(16) + 8;
+			int j17 = rand.nextInt(128);
+			int j20 = chunkY + rand.nextInt(16) + 8;
+			(new DecoFlowers(new int[]{9,0,3})).generate(world, rand, j15, j17, j20);
+		}
+
+		for(int l14 = 0; l14 < 3f * strength; l14++)
+		{
+			int l19 = chunkX + rand.nextInt(16) + 8;
+			int k22 = rand.nextInt(128);
+			int j24 = chunkY + rand.nextInt(16) + 8;
+			(new DecoGrass(Blocks.tallgrass, 1)).generate(world, rand, l19, k22, j24);
+		}
+
+		if(subID == 0) //hills
+		{
 			//trees
-			boolean bush = false;
-			float l = perlin.noise2(chunkX / 60f, chunkY / 60f) * 9f + 4f;
-			if(l < 0f) { l = 1; bush = true; }
+			float l = perlin.noise2(chunkX / 100f, chunkY / 100f) * 5f - 0.5f;
 			for (int b1 = 0; b1 < l * 2f * strength; b1++)
 			{
 				int j6 = chunkX + rand.nextInt(16) + 8;
 				int k10 = chunkY + rand.nextInt(16) + 8;
 				int z52 = world.getHeightValue(j6, k10);
 	
-				if(z52 < 100)
+				if(z52 < 85)
 				{
-					if(bush)
-					{
-						WorldGenerator worldgenerator = new WorldGenShrub(0, 0);
-						worldgenerator.setScale(1.0D, 1.0D, 1.0D);
-						worldgenerator.generate(world, rand, j6, z52, k10);
-					}
-					else
-					{
-						WorldGenerator worldgenerator = rand.nextInt(3) != 0 ? /*new DecoPineTree(4, rand.nextInt(2))*/ new DecoSmallSpruce(rand.nextInt(3)) : new WorldGenShrub(0, 0);
-						worldgenerator.setScale(1.0D, 1.0D, 1.0D);
-						worldgenerator.generate(world, rand, j6, z52, k10);
-					}
+					WorldGenerator worldgenerator = rand.nextInt(8) != 0 ? new DecoSmallSpruce(1 + rand.nextInt(2)) : new DecoSmallPine(1 + rand.nextInt(3), 2 + rand.nextInt(4));
+					worldgenerator.setScale(1.0D, 1.0D, 1.0D);
+					worldgenerator.generate(world, rand, j6, z52, k10);
 				}
 				else if(z52 < 130)
 				{
-					WorldGenerator worldgenerator = rand.nextInt(3) != 0 ? /*new DecoPineTree(3, rand.nextInt(2))*/ new DecoSmallSpruce(rand.nextInt(3)) : new WorldGenShrub(0, 0);
+					WorldGenerator worldgenerator = rand.nextInt(4) != 0 ? new DecoSmallSpruce(rand.nextInt(2)) : new DecoSmallPine(2 + rand.nextInt(2), 4 + rand.nextInt(5));
 					worldgenerator.setScale(1.0D, 1.0D, 1.0D);
 					worldgenerator.generate(world, rand, j6, z52, k10);
 				}
 			}
-	
-			if(rand.nextInt((int)(2f / strength)) == 0)
-			{
-				int k15 = chunkX + rand.nextInt(16) + 8;
-				int k17 = rand.nextInt(64) + 64;
-				int k20 = chunkY + rand.nextInt(16) + 8;
-				
-				if(rand.nextBoolean())
-				{
-					(new WorldGenFlowers(Blocks.brown_mushroom)).generate(world, rand, k15, k17, k20);
-				}
-				else
-				{
-					(new WorldGenFlowers(Blocks.red_mushroom)).generate(world, rand, k15, k17, k20);
-				}
-			}
 			
-			if(bush)
+			if(l > -0.4f)
 			{
-				if(rand.nextInt((int)(25f / strength)) == 0)
-				{
-					int j16 = chunkX + rand.nextInt(16) + 8;
-					int j18 = rand.nextInt(128);
-					int j21 = chunkY + rand.nextInt(16) + 8;
-					(new WorldGenPumpkin()).generate(world, rand, j16, j18, j21);
-				}
-			}
-			
-			for(int f23 = 0; f23 < 1f * strength; f23++)
-			{
-				int j15 = chunkX + rand.nextInt(16) + 8;
-				int j17 = rand.nextInt(128);
-				int j20 = chunkY + rand.nextInt(16) + 8;
-				(new DecoFlowers(new int[]{9,0,3})).generate(world, rand, j15, j17, j20);
+		    	for(int b = 0; b < 2f * strength; b++)
+		    	{
+					int i1 = chunkX + rand.nextInt(16) + 8;
+					int j1 = chunkY + rand.nextInt(16) + 8;
+				    int k1 = world.getHeightValue(i1, j1);
+				    if(rand.nextInt(10) == 0)
+				    {
+		    		    (new DecoShrub(rand.nextInt(5) + 4, rand.nextInt(2), rand.nextInt(2))).generate(world, rand, i1, k1, j1);
+				    }
+				    else
+				    {
+				    	(new DecoShrub(rand.nextInt(4) + 1, rand.nextInt(2), rand.nextInt(2))).generate(world, rand, i1, k1, j1);
+				    }
+		    	}
 			}
 		}
 		else if(subID == 1) //fields
 		{
-			//boulders
-			for (int l = 0; l < 1f * strength; ++l)
-			{
-				int i1 = chunkX + rand.nextInt(16) + 8;
-				int j1 = chunkY + rand.nextInt(16) + 8;
-			    int k1 = world.getHeightValue(i1, j1);
-				if(k1 < 95)
-				{
-			    	(new DecoBlob(Blocks.mossy_cobblestone, 0)).generate(world, rand, i1, k1, j1);
-				}
-			}
-			
 			//trees
-			float t = perlin.noise2(chunkX / 300f, chunkY / 300f) * 2 + perlin.noise2(chunkX / 40f, chunkY / 40f);
-			boolean field = t < 0.1f ? true : false;
-			
-			for (int b1 = 0; b1 < 8f * strength; b1++)
-			{
-				int j6 = chunkX + rand.nextInt(16) + 8;
-				int k10 = chunkY + rand.nextInt(16) + 8;
-				int z52 = world.getHeightValue(j6, k10);
-	
-				if(z52 < 100)
-				{
-					if(!field)
-					{
-						WorldGenerator worldgenerator = rand.nextInt(3) != 0 ? new DecoPineTree(3, rand.nextInt(2)) : new WorldGenShrub(0, 0);
-						worldgenerator.setScale(1.0D, 1.0D, 1.0D);
-						worldgenerator.generate(world, rand, j6, z52, k10);
-					}
-					else if(rand.nextInt(20) == 0)
-					{
-						WorldGenerator worldgenerator = rand.nextInt(12) == 0 ? new DecoPineTree(3, rand.nextInt(2)) : new WorldGenShrub(0, 0);
-						worldgenerator.setScale(1.0D, 1.0D, 1.0D);
-						worldgenerator.generate(world, rand, j6, z52, k10);
-					}
-				}
-				else if(z52 < 130)
-				{
-					WorldGenerator worldgenerator = rand.nextInt(3) != 0 ? new DecoPineTree(2, rand.nextInt(2)) : new WorldGenShrub(0, 0);
-					worldgenerator.setScale(1.0D, 1.0D, 1.0D);
-					worldgenerator.generate(world, rand, j6, z52, k10);
-				}
-			}
-	
-			if(rand.nextInt((int)(2f / strength)) == 0)
-			{
-				int k15 = chunkX + rand.nextInt(16) + 8;
-				int k17 = rand.nextInt(64) + 64;
-				int k20 = chunkY + rand.nextInt(16) + 8;
-				
-				if(rand.nextBoolean())
-				{
-					(new WorldGenFlowers(Blocks.brown_mushroom)).generate(world, rand, k15, k17, k20);
-				}
-				else
-				{
-					(new WorldGenFlowers(Blocks.red_mushroom)).generate(world, rand, k15, k17, k20);
-				}
-			}
-			
-			if(field)
-			{
-				if(rand.nextInt((int)(20f / strength)) == 0)
-				{
-					int j16 = chunkX + rand.nextInt(16) + 8;
-					int j18 = rand.nextInt(128);
-					int j21 = chunkY + rand.nextInt(16) + 8;
-					(new WorldGenPumpkin()).generate(world, rand, j16, j18, j21);
-				}
-			}
-			
-			for(int f23 = 0; f23 < 1f * strength; f23++)
-			{
-				int j15 = chunkX + rand.nextInt(16) + 8;
-				int j17 = rand.nextInt(128);
-				int j20 = chunkY + rand.nextInt(16) + 8;
-				(new DecoFlowers(new int[]{9,0,3})).generate(world, rand, j15, j17, j20);
-			}
-		}
-		else //lakes
-		{
-	        if(rand.nextInt((int)(15f / strength)) == 0)
-			{
-				int i2 = chunkX + rand.nextInt(16) + 8;
-				int i8 = chunkY + rand.nextInt(16) + 8;
-				int l4 = world.getHeightValue(i2, i8);
-				if(l4 > 63)
-				{
-					(new WorldGenLakes(Blocks.water)).generate(world, rand, i2, l4, i8);
-				}
-			}
-	        
-			//boulders
-			for (int l = 0; l < 3f * strength; ++l)
-			{
-				int i1 = chunkX + rand.nextInt(16) + 8;
-				int j1 = chunkY + rand.nextInt(16) + 8;
-			    int k1 = world.getHeightValue(i1, j1);
-				if(k1 < 95 && (k1 < 64 || rand.nextInt(7) == 0))
-				{
-			    	(new DecoBlob(Blocks.mossy_cobblestone, 0)).generate(world, rand, i1, k1, j1);
-				}
-			}
-			
-			//trees
-			boolean bush = false;
-			float l = perlin.noise2(chunkX / 60f, chunkY / 60f) * 12f + 4f;
-			if(l < 0f) { l = 1; bush = true; }
+			float l = perlin.noise2(chunkX / 120f, chunkY / 120f) * 8f - 1f;
 			for (int b1 = 0; b1 < l * 2f * strength; b1++)
 			{
 				int j6 = chunkX + rand.nextInt(16) + 8;
 				int k10 = chunkY + rand.nextInt(16) + 8;
 				int z52 = world.getHeightValue(j6, k10);
 	
-				if(bush)
+				if(z52 < 85)
 				{
-					WorldGenerator worldgenerator = new WorldGenShrub(0, 0);
+					WorldGenerator worldgenerator = rand.nextInt(8) != 0 ? new DecoSmallSpruce(1 + rand.nextInt(2)) : new DecoSmallPine(1 + rand.nextInt(3), 2 + rand.nextInt(4));
 					worldgenerator.setScale(1.0D, 1.0D, 1.0D);
 					worldgenerator.generate(world, rand, j6, z52, k10);
 				}
-				else
+				else if(z52 < 130)
 				{
-					WorldGenerator worldgenerator = rand.nextInt(3) != 0 ? new DecoPineTree(3 + rand.nextInt(2), rand.nextInt(2)) : new WorldGenShrub(0, 0);
+					WorldGenerator worldgenerator = rand.nextInt(4) != 0 ? new DecoSmallSpruce(rand.nextInt(2)) : new DecoSmallPine(2 + rand.nextInt(2), 4 + rand.nextInt(5));
 					worldgenerator.setScale(1.0D, 1.0D, 1.0D);
 					worldgenerator.generate(world, rand, j6, z52, k10);
 				}
 			}
 			
-			if(rand.nextInt((int)(2f / strength)) == 0)
+			if(l > -0.4f)
 			{
-				int k15 = chunkX + rand.nextInt(16) + 8;
-				int k17 = rand.nextInt(64) + 64;
-				int k20 = chunkY + rand.nextInt(16) + 8;
-				
-				if(rand.nextBoolean())
-				{
-					(new WorldGenFlowers(Blocks.brown_mushroom)).generate(world, rand, k15, k17, k20);
-				}
-				else
-				{
-					(new WorldGenFlowers(Blocks.red_mushroom)).generate(world, rand, k15, k17, k20);
-				}
+		    	for(int b = 0; b < 2f * strength; b++)
+		    	{
+					int i1 = chunkX + rand.nextInt(16) + 8;
+					int j1 = chunkY + rand.nextInt(16) + 8;
+				    int k1 = world.getHeightValue(i1, j1);
+				    if(rand.nextInt(10) == 0)
+				    {
+		    		    (new DecoShrub(rand.nextInt(5) + 4, rand.nextInt(2), rand.nextInt(2))).generate(world, rand, i1, k1, j1);
+				    }
+				    else
+				    {
+				    	(new DecoShrub(rand.nextInt(4) + 1, rand.nextInt(2), rand.nextInt(2))).generate(world, rand, i1, k1, j1);
+				    }
+		    	}
+			}
+		}
+		else if(subID == 2) //lakes
+		{
+			//trees
+			float l = perlin.noise2(chunkX / 100f, chunkY / 100f) * 6f + 0.8f;
+			for (int b1 = 0; b1 < l * 2f * strength; b1++)
+			{
+				int j6 = chunkX + rand.nextInt(16) + 8;
+				int k10 = chunkY + rand.nextInt(16) + 8;
+				int z52 = world.getHeightValue(j6, k10);
+	
+				WorldGenerator worldgenerator = rand.nextInt(4) == 0 ? new DecoSmallSpruce(1 + rand.nextInt(2)) : rand.nextInt(6) == 0 ? new DecoSmallPine(1 + rand.nextInt(3), 4 + rand.nextInt(4)) : new DecoSmallPine(4 + rand.nextInt(6), 5 + rand.nextInt(10));
+				worldgenerator.setScale(1.0D, 1.0D, 1.0D);
+				worldgenerator.generate(world, rand, j6, z52, k10);
 			}
 			
-			if(bush)
-			{
-				if(rand.nextInt((int)(10f / strength)) == 0)
-				{
-					int j16 = chunkX + rand.nextInt(16) + 8;
-					int j18 = rand.nextInt(128);
-					int j21 = chunkY + rand.nextInt(16) + 8;
-					(new WorldGenPumpkin()).generate(world, rand, j16, j18, j21);
-				}
-			}
-			
-			for(int f23 = 0; f23 < 1f * strength; f23++)
-			{
-				int j15 = chunkX + rand.nextInt(16) + 8;
-				int j17 = rand.nextInt(128);
-				int j20 = chunkY + rand.nextInt(16) + 8;
-				(new DecoFlowers(new int[]{9,0,3})).generate(world, rand, j15, j17, j20);
-			}
+	    	for(int b = 0; b < 2f * strength; b++)
+	    	{
+				int i1 = chunkX + rand.nextInt(16) + 8;
+				int j1 = chunkY + rand.nextInt(16) + 8;
+			    int k1 = world.getHeightValue(i1, j1);
+			    if(rand.nextInt(10) == 0)
+			    {
+	    		    (new DecoShrub(rand.nextInt(5) + 4, rand.nextInt(2), rand.nextInt(2))).generate(world, rand, i1, k1, j1);
+			    }
+			    else
+			    {
+			    	(new DecoShrub(rand.nextInt(4) + 1, rand.nextInt(2), rand.nextInt(2))).generate(world, rand, i1, k1, j1);
+			    }
+	    	}
 		}
     }
 	
 	@Override
-    public float rNoise(PerlinNoise perlin, CellNoise cell, int x, int y, float ocean)
+    public float rNoise(PerlinNoise perlin, CellNoise cell, int x, int y, float ocean, float border)
     {
 		if(subID == 0) //hills
 		{
-			float h = perlin.noise2(x / 300f, y / 300f) * 135f;
+			float h = perlin.noise2(x / 300f, y / 300f) * (35f + 100f * border);
 			h *= h / 32f;
+			h = h > 150f ? 150f : h;
 			
 			float bn = 0f;
 			if(h < 1f)
@@ -324,9 +229,10 @@ public class RealisticBiomeSnow extends RealisticBiomeBase
 		}
 		else if(subID == 1) //fields
 		{
-			float h = perlin.noise2(x / 300f, y / 300f) * 130f;
+			float h = perlin.noise2(x / 300f, y / 300f) * (35f + 95f * border);
 			h = h < 0f ? 0f : h;
 			h *= h / 32f;
+			h = h > 200f ? 200f : h;
 	
 			if(h > 2f)
 			{
@@ -393,7 +299,7 @@ public class RealisticBiomeSnow extends RealisticBiomeBase
         			{
         				cliff = 2;
         			}
-        			if(c < 0.3f + ((k - 80f) / 40f) + p)
+        			if(c < 0.3f + ((k - 80f) / 40f) + p && subID != 2)
         			{
         				cliff = 3;
         			}
@@ -434,7 +340,14 @@ public class RealisticBiomeSnow extends RealisticBiomeBase
             		}
             		else if(cliff == 3)
             		{
-	        			blocks[(y * 16 + x) * 256 + k] = Blocks.snow;
+            			if(depth > 3 && k < 100)
+            			{
+            				blocks[(y * 16 + x) * 256 + k] = Blocks.stone;
+            			}
+            			else
+            			{
+            				blocks[(y * 16 + x) * 256 + k] = Blocks.snow;
+            			}
             		}
             		else if(gravel)
             		{

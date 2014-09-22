@@ -85,9 +85,20 @@ public class ChunkManagerRealistic extends WorldChunkManager
     
     public RealisticBiomeBase getBiomeDataAt(int par1, int par2, float ocean)
     {
-    	return RealisticBiomeBase.landTaigaHills;
-    	/*float temp = 0.5f + perlin.noise2(par1 / 500f, par2 / 500f);
-    	float hum = 0.5f + perlin.noise2(par1 / 500f, par2 / 500f);
+    	//return RealisticBiomeBase.landTundraPlainsPolar;
+    	
+    	if(par1 < 0 + perlin.noise2(par1 / 50f, par2 / 50f) * 25f)
+    	{
+        	return RealisticBiomeBase.landTundraPlainsPolar;
+    	}
+    	else
+    	{
+        	return RealisticBiomeBase.landTundraHillsFull;
+    	}
+
+    	/*
+    	float temp = 0.5f + perlin.noise2(par1 / 2000f, par2 / 2000f);
+    	float hum = 0.5f + perlin.noise2(par1 / 700f, par2 / 700f);
     	
     	temp = temp > 1f ? 1f : temp < 0f ? 0f : temp;
     	hum = hum > 1f ? 1f : hum < 0f ? 0f : hum;
@@ -110,7 +121,7 @@ public class ChunkManagerRealistic extends WorldChunkManager
     public float getNoiseAt(int x, int y)
     {
     	float ocean = getOceanValue(x, y);
-    	return getBiomeDataAt(x, y, ocean).rNoise(perlin, cell, x, y, ocean);
+    	return getBiomeDataAt(x, y, ocean).rNoise(perlin, cell, x, y, ocean, 1f);
     }
     
     public List getBiomesToSpawnIn()

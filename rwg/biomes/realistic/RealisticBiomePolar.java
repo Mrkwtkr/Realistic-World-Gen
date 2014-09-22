@@ -26,7 +26,7 @@ public class RealisticBiomePolar extends RealisticBiomeBase
     }
 
     @Override
-    public float rNoise(PerlinNoise perlin, CellNoise cell, int x, int y, float ocean)
+    public float rNoise(PerlinNoise perlin, CellNoise cell, int x, int y, float ocean, float border)
     {
     	if(subID == 0) //PLAINS
     	{
@@ -43,21 +43,22 @@ public class RealisticBiomePolar extends RealisticBiomeBase
     	}
     	else if(subID == 1) //HILLS
     	{
-    		float h = perlin.noise2(x / 300f, y / 300f) * 115f;
-    		h *= h / 32f;
-
-    		if(h > 2f)
-    		{
-    			float d = (h - 2f) / 2f > 8f ? 8f : (h - 2f) / 2f;
-    			h += perlin.noise2(x / 18f, y / 18f) * d;
-    			h += perlin.noise2(x / 50f, y / 50f) * d * 0.5f;
-
-    			if(h > 60f)
-    			{
-    				float d2 = (h - 60f) / 1.5f > 35f ? 35f : (h - 60f) / 1.5f;
-    				h += cell.noise(x / 25D, y / 25D, 1D) * d2;
-    			}
-    		}
+			float h = perlin.noise2(x / 200f, y / 200f) * (35f + 90f * border);
+			h *= h / 32f;
+			h = h > 150f ? 150f : h;
+	
+			if(h > 2f)
+			{
+				float d = (h - 2f) / 2f > 8f ? 8f : (h - 2f) / 2f;
+				h += perlin.noise2(x / 18f, y / 18f) * d;
+				h += perlin.noise2(x / 50f, y / 50f) * d * 0.5f;
+	
+				if(h > 10f)
+				{
+					float d2 = (h - 10f) / 1.5f > 40f ? 40f : (h - 10f) / 1.5f;
+					h += cell.noise(x / 30D, y / 30D, 1D) * d2;
+				}
+			}
 
     		h += perlin.noise2(x / 22f, y / 22f) * 3;
     		
@@ -117,6 +118,7 @@ public class RealisticBiomePolar extends RealisticBiomeBase
 			float c = CliffCalculator.calc(x, y, noise);
 			boolean cliff = c > 1.2f ? true : false;
 			boolean clay = c > 1.6f ? true : false;
+			float p = perlin.noise2(i / 8f, j / 8f) * 0.5f;
 			Block b;
 			
 			for(int k = 255; k > -1; k--)
@@ -129,6 +131,14 @@ public class RealisticBiomePolar extends RealisticBiomeBase
 	            else if(b == Blocks.stone)
 	            {
 	            	depth++;
+	            	if(depth == 0)
+	            	{
+	            		if(c > 1.5f - ((k - 80f) / 75f) + p)
+	        			{
+	            			cliff = true;
+	        			}
+	            	}
+	            	
 	            	if(cliff)
 	            	{
 		        		if(depth > -1 && depth < 6)

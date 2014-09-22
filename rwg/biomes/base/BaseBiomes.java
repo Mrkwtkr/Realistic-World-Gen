@@ -15,6 +15,7 @@ public class BaseBiomes
 	public static BiomeGenBase baseHotForest;
 	public static BiomeGenBase baseHotDesert;
 	public static BiomeGenBase basePlains;
+	public static BiomeGenBase baseTropicalIsland;
 	
 	public static void load()
 	{
@@ -26,6 +27,7 @@ public class BaseBiomes
 		baseHotForest = new BaseBiomeHotForest(205);
 		baseHotDesert = new BaseBiomeHotDesert(206);
 		basePlains = new BaseBiomePlains(207);
+		baseTropicalIsland = new BaseBiomeTropicalIsland(208);
 		
 		BiomeDictionary.registerBiomeType(baseSnowDesert, Type.SNOWY);
 		BiomeDictionary.registerBiomeType(baseSnowForest, Type.SNOWY);
