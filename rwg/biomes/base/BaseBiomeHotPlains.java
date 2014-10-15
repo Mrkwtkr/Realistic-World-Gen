@@ -16,7 +16,7 @@ public class BaseBiomeHotPlains extends BiomeGenBase
 	{
 		super(id);
 		setTemperatureRainfall(0.9f, 0.1f);
-		setBiomeName("Realistic World Gen");
+		setBiomeName("RWG - BiomeType: Hot Plains");
         spawnableCreatureList.add(new BiomeGenBase.SpawnListEntry(EntityHorse.class, 5, 2, 3));
         
 		VillageMaterialData vmd = new VillageMaterialData(this);

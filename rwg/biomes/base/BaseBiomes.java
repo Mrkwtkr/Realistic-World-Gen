@@ -16,6 +16,7 @@ public class BaseBiomes
 	public static BiomeGenBase baseHotDesert;
 	public static BiomeGenBase basePlains;
 	public static BiomeGenBase baseTropicalIsland;
+	public static BiomeGenBase baseRedwood;
 	
 	public static void load()
 	{
@@ -28,14 +29,17 @@ public class BaseBiomes
 		baseHotDesert = new BaseBiomeHotDesert(206);
 		basePlains = new BaseBiomePlains(207);
 		baseTropicalIsland = new BaseBiomeTropicalIsland(208);
+		baseRedwood = new BaseBiomeRedwood(209);
 		
-		BiomeDictionary.registerBiomeType(baseSnowDesert, Type.SNOWY);
-		BiomeDictionary.registerBiomeType(baseSnowForest, Type.SNOWY);
-		BiomeDictionary.registerBiomeType(baseColdPlains, Type.COLD);
-		BiomeDictionary.registerBiomeType(baseColdForest, Type.COLD);
-		BiomeDictionary.registerBiomeType(baseHotPlains, Type.DRY);
-		BiomeDictionary.registerBiomeType(baseHotForest, Type.SAVANNA);
-		BiomeDictionary.registerBiomeType(baseHotDesert, Type.HOT);
-		BiomeDictionary.registerBiomeType(baseHotDesert, Type.PLAINS);
+		BiomeDictionary.registerBiomeType(baseSnowDesert, Type.COLD, Type.SNOWY, Type.WASTELAND);
+		BiomeDictionary.registerBiomeType(baseSnowForest, Type.COLD, Type.SNOWY, Type.CONIFEROUS, Type.FOREST);
+		BiomeDictionary.registerBiomeType(baseColdPlains, Type.COLD, Type.WASTELAND);
+		BiomeDictionary.registerBiomeType(baseColdForest, Type.COLD, Type.CONIFEROUS, Type.FOREST);
+		BiomeDictionary.registerBiomeType(baseHotPlains, Type.HOT, Type.SAVANNA, Type.PLAINS, Type.SPARSE);
+		BiomeDictionary.registerBiomeType(baseHotForest, Type.HOT, Type.SAVANNA, Type.PLAINS, Type.SPARSE);
+		BiomeDictionary.registerBiomeType(baseHotDesert, Type.HOT, Type.DRY, Type.SANDY );
+		BiomeDictionary.registerBiomeType(basePlains, Type.PLAINS);
+		BiomeDictionary.registerBiomeType(baseTropicalIsland, Type.HOT, Type.WET, Type.JUNGLE);
+		BiomeDictionary.registerBiomeType(baseRedwood, Type.COLD, Type.CONIFEROUS, Type.FOREST);
 	}
 }

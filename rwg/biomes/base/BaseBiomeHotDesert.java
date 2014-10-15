@@ -8,7 +8,7 @@ public class BaseBiomeHotDesert extends BiomeGenBase
 	{
 		super(id);
 		setTemperatureRainfall(1f, 0f);
-		setBiomeName("Realistic World Gen");
+		setBiomeName("RWG - BiomeType: Hot Desert");
 		spawnableCreatureList.clear();
 	}
 }

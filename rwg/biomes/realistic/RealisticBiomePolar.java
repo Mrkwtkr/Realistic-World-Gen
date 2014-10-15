@@ -41,29 +41,6 @@ public class RealisticBiomePolar extends RealisticBiomeBase
     		
         	return 70f + h;
     	}
-    	else if(subID == 1) //HILLS
-    	{
-			float h = perlin.noise2(x / 200f, y / 200f) * (35f + 90f * border);
-			h *= h / 32f;
-			h = h > 150f ? 150f : h;
-	
-			if(h > 2f)
-			{
-				float d = (h - 2f) / 2f > 8f ? 8f : (h - 2f) / 2f;
-				h += perlin.noise2(x / 18f, y / 18f) * d;
-				h += perlin.noise2(x / 50f, y / 50f) * d * 0.5f;
-	
-				if(h > 10f)
-				{
-					float d2 = (h - 10f) / 1.5f > 40f ? 40f : (h - 10f) / 1.5f;
-					h += cell.noise(x / 30D, y / 30D, 1D) * d2;
-				}
-			}
-
-    		h += perlin.noise2(x / 22f, y / 22f) * 3;
-    		
-    		return h + 67f;
-    	}
     	else //LAKES
     	{
     		float st = (perlin.noise2(x / 160f, y / 160f) + 0.38f) * 35f;
@@ -82,98 +59,33 @@ public class RealisticBiomePolar extends RealisticBiomeBase
     @Override
     public void rReplace(Block[] blocks, byte[] metadata, int i, int j, int x, int y, int depth, Random rand, PerlinNoise perlin, CellNoise cell, float[] noise)
     {
-    	if(subID == 0 || subID == 2)
-    	{
-    		boolean water = false;
-    		
-			Block b;
-			for(int k = 255; k > -1; k--)
-			{
-				b = blocks[(y * 16 + x) * 256 + k];
-	            if(b == Blocks.air)
-	            {
-	            	depth = -1;
-	            }
-	            else if(b == Blocks.stone)
-	            {
-	            	depth++;
-	        		if(depth > -1 && depth < 9)
-	        		{
-	        			blocks[(y * 16 + x) * 256 + k] = Blocks.snow;
-	            		if(depth == 0 && k > 61 && k < 254)
-	            		{
-	            			SnowheightCalculator.calc(x, y, k, blocks, metadata, noise);
-	            		}
-	        		}
-	            }
-	            else if(!water && b == Blocks.water)
-	            {
-        			blocks[(y * 16 + x) * 256 + k] = Blocks.ice;
-	            	water = true;
-	            }
-			}
-    	}
-    	else
-    	{
-			float c = CliffCalculator.calc(x, y, noise);
-			boolean cliff = c > 1.2f ? true : false;
-			boolean clay = c > 1.6f ? true : false;
-			float p = perlin.noise2(i / 8f, j / 8f) * 0.5f;
-			Block b;
-			
-			for(int k = 255; k > -1; k--)
-			{
-				b = blocks[(y * 16 + x) * 256 + k];
-	            if(b == Blocks.air)
-	            {
-	            	depth = -1;
-	            }
-	            else if(b == Blocks.stone)
-	            {
-	            	depth++;
-	            	if(depth == 0)
-	            	{
-	            		if(c > 1.5f - ((k - 80f) / 75f) + p)
-	        			{
-	            			cliff = true;
-	        			}
-	            	}
-	            	
-	            	if(cliff)
-	            	{
-		        		if(depth > -1 && depth < 6)
-		        		{
-	        				if(clay)
-	        				{
-	            				blocks[(y * 16 + x) * 256 + k] = Blocks.stained_hardened_clay; 
-	            				metadata[(y * 16 + x) * 256 + k] = 9; 
-	        				}
-	        				else
-	        				{
-	                    		if(depth > -1 && depth < 2)
-	                    		{
-	                    			blocks[(y * 16 + x) * 256 + k] = rand.nextInt(3) == 0 ? Blocks.cobblestone : Blocks.stone; 
-	                    		}
-	                    		else
-	                    		{
-	                    			blocks[(y * 16 + x) * 256 + k] = Blocks.stone;
-	                    		}
-	        				}
-		        		}
-	            	}
-	            	else
-	            	{
-		        		if(depth > -1 && depth < 9)
-		        		{
-		        			blocks[(y * 16 + x) * 256 + k] = Blocks.snow;
-		            		if(depth == 0 && k > 61 && k < 254)
-		            		{
-		            			SnowheightCalculator.calc(x, y, k, blocks, metadata, noise);
-		            		}
-		        		}
-	            	}
-	            }
-			}
-    	}
+		boolean water = false;
+		
+		Block b;
+		for(int k = 255; k > -1; k--)
+		{
+			b = blocks[(y * 16 + x) * 256 + k];
+            if(b == Blocks.air)
+            {
+            	depth = -1;
+            }
+            else if(b == Blocks.stone)
+            {
+            	depth++;
+        		if(depth > -1 && depth < 9)
+        		{
+        			blocks[(y * 16 + x) * 256 + k] = Blocks.snow;
+            		if(depth == 0 && k > 61 && k < 254)
+            		{
+            			SnowheightCalculator.calc(x, y, k, blocks, metadata, noise);
+            		}
+        		}
+            }
+            else if(!water && b == Blocks.water)
+            {
+    			blocks[(y * 16 + x) * 256 + k] = Blocks.ice;
+            	water = true;
+            }
+		}
     }
 }

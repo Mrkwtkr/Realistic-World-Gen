@@ -12,7 +12,7 @@ public class BaseBiomeColdForest extends BiomeGenBase
 	{
 		super(id);
 		setTemperatureRainfall(0.5f, 0.4f);
-		setBiomeName("Realistic World Gen");
+		setBiomeName("RWG - BiomeType: Cold Forest");
 		spawnableCreatureList.add(new BiomeGenBase.SpawnListEntry(EntityWolf.class, 8, 1, 2));
 	}
 }

@@ -81,7 +81,10 @@ public class RealisticBiomeTaiga extends RealisticBiomeBase
 				int x22 = chunkX + rand.nextInt(16) + 8;
 				int z22 = chunkY + rand.nextInt(16) + 8;
 				int y22 = world.getHeightValue(x22, z22);
-				(new DecoLog(1, 3 + rand.nextInt(4), false)).generate(world, rand, x22, y22, z22);	
+				if(y22 < 100)
+				{
+					(new DecoLog(1, 3 + rand.nextInt(4), false)).generate(world, rand, x22, y22, z22);	
+				}
 	    	}
 			
 	    	for(int b = 0; b < 2f * strength; b++)
@@ -193,7 +196,10 @@ public class RealisticBiomeTaiga extends RealisticBiomeBase
 				int x22 = chunkX + rand.nextInt(16) + 8;
 				int z22 = chunkY + rand.nextInt(16) + 8;
 				int y22 = world.getHeightValue(x22, z22);
-				(new DecoLog(1, 3 + rand.nextInt(4), false)).generate(world, rand, x22, y22, z22);	
+				if(y22 < 100)
+				{
+					(new DecoLog(1, 3 + rand.nextInt(4), false)).generate(world, rand, x22, y22, z22);	
+				}	
 	    	}
 			
 	    	for(int b = 0; b < 2f * strength; b++)

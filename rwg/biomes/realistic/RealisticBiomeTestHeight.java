@@ -34,9 +34,14 @@ import net.minecraft.world.gen.feature.WorldGenerator;
 
 public class RealisticBiomeTestHeight extends RealisticBiomeBase
 {
+    private CellNoise celltest;
+    
 	public RealisticBiomeTestHeight(int i) 
 	{
 		super(i, BaseBiomes.baseColdForest);
+
+		celltest = new CellNoise(0, (short)0);
+		//celltest.setUseDistance(true);
 	}
 	
 	@Override
@@ -47,13 +52,33 @@ public class RealisticBiomeTestHeight extends RealisticBiomeBase
 	@Override
     public float rNoise(PerlinNoise perlin, CellNoise cell, int x, int y, float ocean, float border)
     {
-    	if(subID == 0)
-    	{
-    		return 68f;
-    	}
-    	else
-    	{
-    		return 118f;
-    	}
+		float p = perlin.noise2(x / 100f, y / 100f) * 16;
+		p = p > 8f ? 8f : p < -8f ? -8f : p;
+
+		return 80f + p;
+    }
+	
+    public void rReplace(Block[] blocks, byte[] metadata, int i, int j, int x, int y, int depth, Random rand, PerlinNoise perlin, CellNoise cell, float[] noise)
+    {
+    	Block b;
+		for(int k = 255; k > -1; k--)
+		{
+			b = blocks[(y * 16 + x) * 256 + k];
+            if(b == Blocks.air)
+            {
+            	depth = -1;
+            }
+            else if(b == Blocks.stone)
+            {
+            	depth++;
+
+        		if(depth == 0)
+        		{
+        			int c = k & 0xf;
+        			blocks[(y * 16 + x) * 256 + k] = Blocks.wool;
+        			metadata[(y * 16 + x) * 256 + k] = (byte)c;
+        		}
+            }
+		}
     }
 }

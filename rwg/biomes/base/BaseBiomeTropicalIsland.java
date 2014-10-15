@@ -12,6 +12,6 @@ public class BaseBiomeTropicalIsland extends BiomeGenBase
 	{
 		super(id);
 		setTemperatureRainfall(0.8f, 0.8f);
-		setBiomeName("Realistic World Gen");
+		setBiomeName("RWG - BiomeType: Tropical");
 	}
 }

@@ -5,6 +5,16 @@ import java.util.List;
 import java.util.Random;
 
 import rwg.biomes.realistic.RealisticBiomeBase;
+import rwg.biomes.realistic.RealisticBiomePolar;
+import rwg.biomes.realistic.RealisticBiomeSnowHills;
+import rwg.biomes.realistic.RealisticBiomeSnowLakes;
+import rwg.biomes.realistic.RealisticBiomeSnowPlains;
+import rwg.biomes.realistic.RealisticBiomeTaigaHills;
+import rwg.biomes.realistic.RealisticBiomeTaigaLakes;
+import rwg.biomes.realistic.RealisticBiomeTaigaPlains;
+import rwg.biomes.realistic.RealisticBiomeTundraHills;
+import rwg.biomes.realistic.RealisticBiomeTundraLakes;
+import rwg.biomes.realistic.RealisticBiomeTundraPlains;
 import rwg.util.CellNoise;
 import rwg.util.PerlinNoise;
 import net.minecraft.world.ChunkPosition;
@@ -22,7 +32,14 @@ public class ChunkManagerRealistic extends WorldChunkManager
     private PerlinNoise perlin;
     private CellNoise cell;
     
+    private CellNoise biomecell;
+    
     private int biomeLength;
+    
+    private RealisticBiomeBase[] biomes_polar;
+    private RealisticBiomeBase[] biomes_snow;
+    private RealisticBiomeBase[] biomes_taiga;
+    private RealisticBiomeBase[] biomes_tundra;
 	
 	protected ChunkManagerRealistic()
 	{
@@ -38,6 +55,43 @@ public class ChunkManagerRealistic extends WorldChunkManager
     	perlin = new PerlinNoise(seed);
     	cell = new CellNoise(seed, (short)0);
     	cell.setUseDistance(true);
+    	biomecell = new CellNoise(seed, (short)0);
+		
+		biomes_polar = new RealisticBiomeBase[]{
+			RealisticBiomeBase.landPolarPlains,
+			RealisticBiomeBase.landPolarLakes
+		};
+		
+		biomes_snow = new RealisticBiomeBase[]{
+			RealisticBiomeBase.landSnowHillsHigh,
+			RealisticBiomeBase.landSnowHillsRivers,
+			RealisticBiomeBase.landSnowHillsSpikes,
+			RealisticBiomeBase.landSnowPlainsField,
+			RealisticBiomeBase.landSnowLakesIslands
+		};
+		
+		biomes_taiga = new RealisticBiomeBase[]{
+			RealisticBiomeBase.landTaigaHillsShield,
+			RealisticBiomeBase.landTaigaHillsRivers,
+			RealisticBiomeBase.landTaigaHillsSpikes,
+			RealisticBiomeBase.landTaigaHillsMix,
+			RealisticBiomeBase.landTaigaPlainsShield,
+			RealisticBiomeBase.landTaigaPlainsMix,
+			RealisticBiomeBase.landTaigaLakesIslands,
+			RealisticBiomeBase.landTaigaLakesSwamp,
+			RealisticBiomeBase.landTaigaLakesMix
+		};
+		
+		biomes_tundra = new RealisticBiomeBase[]{
+			RealisticBiomeBase.landTundraHillsHigh,
+			RealisticBiomeBase.landTundraHillsValley,
+			RealisticBiomeBase.landTundraHillsSpikes,
+			RealisticBiomeBase.landTundraPlainsPolar,
+			RealisticBiomeBase.landTundraPlainsShield,
+			RealisticBiomeBase.landTundraPlainsMix,
+			RealisticBiomeBase.landTundraLakesIslands,
+			RealisticBiomeBase.landTundraLakesShield
+		};
     }    
 	
     public int[] getBiomesGens(int par1, int par2, int par3, int par4)
@@ -85,24 +139,71 @@ public class ChunkManagerRealistic extends WorldChunkManager
     
     public RealisticBiomeBase getBiomeDataAt(int par1, int par2, float ocean)
     {
-    	//return RealisticBiomeBase.landTundraPlainsPolar;
+    	//return RealisticBiomeBase.landRedwoodSpikes;
     	
-    	if(par1 < 0 + perlin.noise2(par1 / 50f, par2 / 50f) * 25f)
+    	/*if(par1 + par2 < 0)
     	{
-        	return RealisticBiomeBase.landTundraPlainsPolar;
-    	}
-    	else
-    	{
-        	return RealisticBiomeBase.landTundraHillsFull;
-    	}
+    		return RealisticBiomeBase.landTaigaFields;
+		}
+		else
+		{
+			return RealisticBiomeBase.landTaigaHills;
+		}*/
+    	
+    	float h = (biomecell.noise(par1 / 450D, par2 / 450D, 1D) * 0.5f) + 0.5f;
+    	h = h < 0f ? 0f : h >= 0.9999999f ? 0.9999999f : h;
 
-    	/*
-    	float temp = 0.5f + perlin.noise2(par1 / 2000f, par2 / 2000f);
-    	float hum = 0.5f + perlin.noise2(par1 / 700f, par2 / 700f);
+    	float temp = 0.5f + (perlin.noise2((par1 + 2000f) / 2000f, par2 / 2000f) * 1.1f);
+    	float hum = 0.5f + (perlin.noise2((par1 - 2000f) / 2000f, par2 / 2000f) * 1.1f);
     	
     	temp = temp > 1f ? 1f : temp < 0f ? 0f : temp;
     	hum = hum > 1f ? 1f : hum < 0f ? 0f : hum;
-    	ocean = ocean > 1f ? 1f : ocean < 0f ? 0f : ocean;
+    	
+    	if((1f - temp) + hum > 1f)
+    	{
+    		hum -= temp;
+    		temp += hum;
+    	}
+    	
+    	if(temp < 0.15f)
+    	{
+    		h *= 2f;
+    		return biomes_polar[(int)(h)];
+    	}
+    	else if(hum < 0.2f)
+    	{
+    		h *= 8f;
+    		return biomes_tundra[(int)(h)];
+    	}
+    	else if(temp < 0.5f)
+    	{
+    		h *= 5f;
+    		return biomes_snow[(int)(h)];
+    	}
+    	else if(temp > 0.85f && hum > 0.85f)
+    	{
+    		return RealisticBiomeBase.landRedwoodSpikes;
+    	}
+    	else
+    	{
+    		h *= 9f;
+    		return biomes_taiga[(int)(h)];
+    	}
+    	
+    	//int x = (int)(temp * 7f);
+    	//int y = (int)(hum * 7f);
+    	
+    	//x = x < 0 ? 0 : x > 6 ? 6 : x;
+    	//y = y < 0 ? 0 : y > 6 ? 6 : y;
+    	
+    	/*if(par1 % 100 == 0 && par2 % 100 == 0)
+    	{
+        	System.out.println(par1 + " " + par2 + " " + x + " " + y + " - " + temp + " " + hum);
+    	}*/
+    	
+    	//return biomes[x * 7 + y];
+    	
+    	/*ocean = ocean > 1f ? 1f : ocean < 0f ? 0f : ocean;
     	
     	if(ocean < 0.45f)
     	{

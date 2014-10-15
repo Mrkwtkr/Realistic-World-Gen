@@ -29,10 +29,10 @@ public class DecoLargePine extends WorldGenerator
     		return false;
     	}
     	
-    	buildBranch(world, rand, x + 1, y, z);
-    	buildBranch(world, rand, x - 1, y, z);
-    	buildBranch(world, rand, x, y, z + 1);
-    	buildBranch(world, rand, x, y, z - 1);
+    	buildTrunk(world, rand, x + 1, y, z);
+    	buildTrunk(world, rand, x - 1, y, z);
+    	buildTrunk(world, rand, x, y, z + 1);
+    	buildTrunk(world, rand, x, y, z - 1);
     	
     	int i;
     	for(i = 0; i < startHeight; i++)
@@ -146,9 +146,10 @@ public class DecoLargePine extends WorldGenerator
     	}
     }
     
-    public void buildBranch(World world, Random rand, int x, int y, int z)
+    public void buildTrunk(World world, Random rand, int x, int y, int z)
     {
-    	int h = 4 + rand.nextInt(12);
+    	int h = (int)Math.ceil(startHeight / 4f);
+    	h = h + rand.nextInt(h * 2);
     	for(int i = -1; i < h; i++)
     	{
     		world.setBlock(x, y + i, z, Blocks.log, 12, 0);
