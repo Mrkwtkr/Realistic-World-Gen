@@ -1,5 +1,6 @@
 ## CHANGELOG ##
-
-
-    Version 0.0.1
-    - Added all code from bwg4
+        
+        Alpha 1.1:
+        - Added new biome placement system
+        - Improved biome dictionary
+        - Added redwood test biome
